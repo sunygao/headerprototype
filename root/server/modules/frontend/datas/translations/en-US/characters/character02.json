@@ -1,0 +1,17 @@
+{
+	"label": "Character 02",
+	"slug": {
+		"characters": "characters",
+		"character": "character-02"
+	},
+	"meta": {
+		"title":"JS Project  - Character 02",
+		"description" : "JS Project"
+	},
+	"content" : {
+		"header" : {
+			"title" : "JS Project - Character 02"
+		},
+		"character": "Character 02"
+	}
+}

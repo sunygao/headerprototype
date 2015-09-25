@@ -1,0 +1,17 @@
+{
+	"label": "Home",
+	"slug": {
+		"index": "index"
+	},
+	"meta": {
+		"title":"JS Project  - Index",
+		"description" : "JS Project "
+	},
+	"content" : {
+		"header" : {
+			"title" : "JS Project - Index"
+		},
+		"myLang": "My lang is ",
+		"myLocale": "My locale is "
+	}
+}

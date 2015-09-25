@@ -1,0 +1,16 @@
+{
+	"label": "Personnages",
+	"slug": {
+		"characters": "personnages"
+	},
+	"meta": {
+		"title":"JS Project  - Personnages",
+		"description" : "JS Project "
+	},
+	"content" : {
+		"header" : {
+			"title" : "JS Project - Personnages"
+		},
+		"characters": "Tous les Personnages"
+	}
+}

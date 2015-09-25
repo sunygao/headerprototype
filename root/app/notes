@@ -1,0 +1,19 @@
+Types of data
+
+Generate image based on:
+- Hours spent listening
+- top artists
+- top genres
+- number of playlists
+
+Assets from API
+- Photography - masking and canvas filter
+
+Ideas
+- can the data change while you're listening
+- change over time
+- Animating vector assets
+- parallax/3D/image moves as you move your mouse over it
+- Masking the photo and fonts with the burst assets
+- Animating in and zooming in on photo
+

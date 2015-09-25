@@ -1,0 +1,17 @@
+{
+	"label": "Accueil",
+	"slug": {
+		"index": "accueil"
+	},
+	"meta": {
+		"title":"JS Project  - Accueil",
+		"description" : "JS Project - Accueil"
+	},
+	"content" : {
+		"header" : {
+			"title" : "JS Project - Accueil"
+		},
+		"myLang": "Ma langue est ",
+		"myLocale": "Ma locale est "
+	}
+}

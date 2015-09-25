@@ -1,0 +1,85 @@
+/** Here go all the styles for the large main view. */
+
+html {
+	ffregular();
+   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+   -webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	
+	background-color:#FFF;
+	font-size: 100%;
+	margin: 0;
+	
+ 	&.show {
+
+ 		background-color:#FFF;
+		
+    #content {
+      opacity: 1;
+      visibility: visible;
+      margin-top: 75px;
+      margin-left: 20px;
+    }
+
+ 	}
+
+ 	&.show-subviews {
+		
+    #menu,
+    h1 {
+      opacity: 1;
+      visibility: visible;
+    }
+
+ 	} 
+
+ 	&.no-scroll {
+
+ 		#content {
+ 			overflow:hidden;
+ 		}
+
+ 	}
+
+}
+
+#content,
+#menu,
+h1{
+  transition: all 300ms cubic-ease-out;
+  opacity: 0;
+  visibility: hidden;
+}
+
+#content {
+
+	@extend .full-size;
+	z-index: 5;
+
+	& > div,
+	& > section {
+		opacity: 0;
+		visibility: hidden;
+	}
+
+ 	&.no-content {
+ 		overflow:hidden;
+ 	}
+
+
+}
+
+/**
+ * Here we import the menu and the loader into the main view as modules.
+ */
+
+// MODULES
+@import "styleguide/_lrg";
+@import "menu/_lrg";
+@import "loader/_lrg";
+
+
+

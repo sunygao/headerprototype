@@ -1,0 +1,71 @@
+[
+	{
+
+		"id": "main",
+		"type": "main",
+		"parentId": "",
+		"assets"    : [{ "src":"/static/img/default/test.jpg", "type": "image"}],
+		"params": {},
+		"children": [
+
+			{
+				"id"      : "index",
+				"parentId": "main",
+				"type": "index",
+				"index": 0,
+				"priority": 0.80,
+				"assets"    : [{ "src":"/static/img/default/test.jpg", "type": "image"}],
+				"children": [],
+				"params": {}
+			},
+
+			{
+				"id"      : "about",
+				"parentId": "main",
+				"type": "about",
+				"index": 1,
+				"priority": 0.80,
+				"assets"    : [{ "src":"/static/img/default/test.jpg", "type": "image"}],
+				"children": [],
+				"params": {}
+			},
+
+			{
+				"id"      : "characters",
+				"parentId": "main",
+				"type": "characters",
+				"index": 1,
+				"priority": 0.80,
+				"assets"    : [{ "src":"/static/img/default/test.jpg", "type": "image"}],
+				"children": [
+
+					{
+						"id"      : "character01",
+						"parentId": "characters",
+						"type": "character",
+						"index": 1,
+						"priority": 0.80,
+						"assets"    : [{ "src":"/static/img/default/test.jpg", "type": "image"}],
+						"children": [],
+						"params": {}
+					},
+					{
+						"id"      : "character02",
+						"parentId": "characters",
+						"type": "character",
+						"index": 1,
+						"priority": 0.80,
+						"assets"    : [{ "src":"/static/img/default/test.jpg", "type": "image"}],
+						"children": [],
+						"params": {}
+					}
+
+
+				],
+				"params": {}
+			}
+
+		]
+	}
+
+]

@@ -1,0 +1,16 @@
+{
+	"label": "Characters",
+	"slug": {
+		"characters": "characters"
+	},
+	"meta": {
+		"title":"JS Project  - Characters",
+		"description" : "JS Project "
+	},
+	"content" : {
+		"header" : {
+			"title" : "JS Project - Characters"
+		},
+		"characters": "all Characters"
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"label": "Personnage 02",
+	"slug": {
+		"characters": "personnages",
+		"character": "personnage02"
+	},
+	"meta": {
+		"title":"JS Project  - Personnage 02",
+		"description" : "JS Project"
+	},
+	"content" : {
+		"header" : {
+			"title" : "JS Project - Personnage 02"
+		},
+		"character": "Personnage 02"
+	}
+}

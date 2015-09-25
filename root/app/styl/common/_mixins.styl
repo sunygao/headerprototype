@@ -1,0 +1,29 @@
+/** Here we centralize all the mixins. */
+
+ffregular() {
+  font-family: 'Helvetica', Arial, sans-serif;
+  font-weight: 400;
+}
+
+ffbold() {
+  font-family: 'Helvetica', Arial, sans-serif;
+  font-weight: 700;
+}
+
+em(target) {
+  font-size : target / base-font-size + 0em;
+}
+
+rem(n) {
+	font-size: round(n*10) px ; font-size: n rem ;
+}
+
+lrem(n) {
+	line-height: round(n*10) px ; line-height: n rem ;
+}
+
+vendor(prop, args) {
+	-webkit-{prop}: args;
+	-moz-{prop}: args;
+	{prop}: args;
+}

@@ -1,0 +1,16 @@
+{
+	"label": "À propos",
+	"slug": {
+		"about": "a-propos"
+	},
+	"meta": {
+		"title":"JS Project  - À propos",
+		"description" : "JS Project - À propos"
+	},
+	"content" : {
+		"header" : {
+			"title" : "JS Project - À propos"
+		},
+    "test": "WOILA"
+	}
+}

@@ -1,0 +1,98 @@
+{
+	"desktop": {
+		"buildJSProject": {
+			"src": ["app/js/lib.js", "app/js/bundle.js"],
+			"concat" : "app.js",
+			"dest" : "app/js"
+		},
+		"cleanDist" : {
+			"src": ["build"]
+		},
+		"cleanJS": {
+			"src": ["app/js/*.js"]
+		},
+		"concatLib": {
+			"src": [
+					"app/scripts/vendor/immutable.js",
+					"app/scripts/vendor/modernizr.custom.js",
+					"app/scripts/vendor/detectizr.min.js",
+					"app/scripts/vendor/zepto.js",
+					"app/scripts/vendor/preloadjs-0.6.0.combined.js",
+					"app/scripts/vendor/TweenMax.min.js",
+					"app/scripts/vendor/ScrollToPlugin.js",
+					"app/scripts/vendor/underscore.js",
+					"app/scripts/vendor/backbone.js"
+			],
+			"filename" : "lib.js",
+			"dest" : "app/js"
+		},
+		"concatProject": {
+			"src": [
+					"build/js/lib.min.js",
+					"build/js/bundle.min.js"
+			],
+			"filename" : "app.min.js",
+			"dest" : "build/js"
+		},
+		"copy" : {
+			"static" : {
+				"src" : "app/static/**/**.*",
+				"dest" : "build/static"
+			}
+		},
+		"imgmin" : {
+			"src" : "build/static/img/default/**/*.*",
+			"dest" : "build/static/img/default"
+		},
+		"minify" : {
+			"src" : "app/css/app.css",
+			"dest" : "build/css",
+			"noScript" : {
+				"src" : "app/css/noscript.css",
+				"dest" : "build/css"
+			}
+		},
+		"stylus": {
+			"src": ["app/styl/app.styl","app/styl/noscript.styl"],
+			"dest" : "app/css",
+			"autoprefixer" : {
+				"browsers": ["last 4 version", "safari 5", "ie 8", "ie 9", "ff 17", "opera 12.1", "ios 6", "android 4"]
+			}
+		},
+		"iconfont": {
+			"svg" : {
+				"src" : "app/static/ui/svg-sprites/*.svg"
+			},
+			"css" : {
+				"src" : "app/static/ui/iconfont/templates/_icons.css"
+			},
+			"stylus" : {
+				"dest" : "../../../styl/common/_iconfont.styl"
+			},
+			"fontPath": "../static/fonts/icons/",
+			"dest": "app/static/fonts/icons"
+		},
+		"uglify": {
+			"src": "app/js/lib.js",
+			"dest" : "build/js/lib.min.js"
+		},
+		"webp": {
+			"src" : "app/static/img/default/**/*",
+			"dest" : "app/static/img/webp"
+		},
+		"watch": {
+			"stylus": { 
+				"src": "app/styl/**/*.styl" 
+			},
+			"vendor": {
+				"src": "app/scripts/vendor/**/*.js"
+			},
+			"js": {
+				"src": "app/scripts/project/**/*.js"
+			},
+			"tpl": {
+				"src": "tpl/**/*.html"
+			}
+		}
+	}
+}

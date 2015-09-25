@@ -1,0 +1,55 @@
+/** First of all we load the base which includes the reset. */
+ 
+ @import "base/_base";
+
+/** Then we load reset and load the variables. */
+
+@import "common/_variables";
+
+/**
+ * Then we load all Z indexes managed as variables
+ * we can manage all zindex much better this way.
+ */
+ 
+@import "common/_zindexes";
+
+
+/** Then we load the fonts, font sizes and the iconfonts. */
+ 
+@import "common/_font_sizes"; 
+@import "common/_fonts";
+@import "common/_iconfont";
+
+/** Then we load the mixins and utils. */
+ 
+@import "common/_mixins";
+@import "common/_utils";
+
+
+/** Then we load the global and buttons styles. */
+ 
+@import "common/_buttons";
+@import "common/_global";
+
+/**
+ * Each view will have three files: lrg,tablet,sml
+ * Rather than polluting your css with multiple media queries for the views
+ * we define just two media queries here
+ * for those views and import their respective sizes.
+ */
+ 
+@import "page/_lrg";
+
+
+@media (max-width: $breakpoint_med) {
+	@import "page/_med";
+}
+
+
+@media (max-width: $breakpoint_small) {
+	@import "page/_sml";
+}
+
+/** At last we load the font sizes. */
+@import "common/_font_sizes";
+
