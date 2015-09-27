@@ -14,6 +14,30 @@ var Main = function(){
   	"static/svg/circle.svg",  
   ];
 
+  this.colorPairs = [
+  	{
+  		color1: [254, 91, 10],
+  		color2: [255, 202, 251]
+  	},
+  	{
+  		color1: [10, 255, 246],
+  		color2: [245, 232, 211]
+  	},
+  	{
+  		color1: [37, 145, 11],
+  		color2: [236, 227, 164]
+  	},
+  	{
+  		color1: [168, 124, 241],
+  		color2: [242, 148, 148]
+  	},
+  	{
+  		color1: [241, 124, 231],
+  		color2: [211, 245, 231]
+  	}
+
+  ];
+
   this.imgOffset = {
 		x : 0,
 		y : 0
@@ -61,18 +85,20 @@ Main.prototype.onReady = function() {
 	this.compositectx = this.$compositeCanvas[0].getContext('2d');
 
 	this.imgsrc = document.createElement('img');
-
 	//set the size
 	this.$canvas.attr('height', this.availH).attr('width', this.availW);
 	this.$originCanvas.attr('height', this.availH).attr('width', this.availW);
-	this.$compositeCanvas.attr('height', this.availH).attr('width', this.availW);
+	
 
 	var _this = this;
 	this.imgsrc.addEventListener("load", function () {
 		_this.drawOriginalImageToCanvas();
 	}, false);
 
-	this.imgsrc.src = this.imgList[0];
+	this.randomColor =  this.colorPairs[Math.floor(Math.random() * this.colorPairs.length)];
+	this.randomImage =  this.imgList[Math.floor(Math.random() * this.imgList.length)];
+	
+	this.imgsrc.src = this.randomImage;
 
 	this.svg = new Image();
 	this.svg.src = this.svgList[0];
@@ -98,17 +124,7 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		h = imgH,
 		ratio, x,y;
 	
-		if( w > this.availW || h > this.availH ){
-			var ratio = imgH / imgW,
-			w = this.availW,
-			h = ratio * w;
-			if( h > this.availH ){
-				console(' height too large');
-				h = this.availH;
-				ratio = imgW/imgH;
-				w = ratio * h;
-			}
-		}
+		
 		ratio = this.availW/this.availH;
 		w = imgW * ratio;
 		h = imgH * ratio;
@@ -119,7 +135,9 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		this.imgOffset.w = w;
 		this.imgOffset.h = h;
 
-		console.log(w, h);
+		this.$compositeCanvas.attr('height', h).attr('width', w);
+		$('#header').css({'height': h, 'width' : w, 'padding-bottom': 0});
+
 		this.ctx.drawImage(this.imgsrc,x,y, w, h);
 		this.originctx.drawImage(this.imgsrc,x,y,w ,h );
 		var imageData = this.ctx.getImageData(x,y,w,h); //get image data for image bounding box
@@ -157,9 +175,9 @@ Main.prototype.drawOriginalImageToCanvas = function() {
       		
 
       		//if(average > 127) { //lighter half of image
-      			grayPixels[i*4] = 254;
-      			grayPixels[i*4+1] = 96;
-      			grayPixels[i*4+2] = 10;
+      			grayPixels[i*4] = this.randomColor.color1[0];
+      			grayPixels[i*4+1] = this.randomColor.color1[1];
+      			grayPixels[i*4+2] =  this.randomColor.color1[2];
       			grayPixels[i*4+3] = Math.abs(average - 255);
       			//grayPixels[i*4+3] =average;
       		// } else {
@@ -188,6 +206,11 @@ Main.prototype.createComposite = function() {
 	}
 
 	$('canvas').hide();
+
+	var colorString = 'rgba(' + this.randomColor.color2[0] + ', ' + this.randomColor.color2[1] + ', ' +  this.randomColor.color2[2] + ', .8)';
+	console.log(colorString);
+	$('#header').css('background-color', colorString);
+
 	this.$compositeCanvas.show();
 
 	this.compositectx.putImageData(this.filteredImageData, 0, 0);
