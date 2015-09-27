@@ -7,7 +7,10 @@
 
 var Main = function(){
 	this.imgList = [
- 		"static/img/hands.jpg",     
+ 		"static/img/hands.jpg",  
+ 		"static/img/lana.jpg", 
+ 		"static/img/couple.jpg", 
+ 		"static/img/party.jpg", 
 	];
 
   this.svgList = [
@@ -102,8 +105,6 @@ Main.prototype.onReady = function() {
 
 	this.svg = new Image();
 	this.svg.src = this.svgList[0];
-	this.svg.width = '800';
-	this.svg.height = '800';
 
 	this.svg.onload = function(){
     $(window).trigger('svgProcessed');
@@ -216,7 +217,7 @@ Main.prototype.createComposite = function() {
 	this.compositectx.putImageData(this.filteredImageData, 0, 0);
 	this.compositectx.globalCompositeOperation = "destination-in";
 
-  this.compositectx.drawImage(this.svg,0,0, 800, 1000);
+  this.compositectx.drawImage(this.svg,$('#header').width()/50, 0, 500, 600);
 
 };
 
