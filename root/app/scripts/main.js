@@ -7,9 +7,12 @@
 
 var Main = function(){
 	this.imgList = [
- 		"static/img/hands.jpg",     
- 		
-   	];
+ 		"static/img/hands.jpg",     	
+  ];
+
+  this.svgList = [
+  	"static/svg/circle.svg",  
+  ];
 
    	this.imgOffset = {
 		x : 0,
@@ -21,7 +24,27 @@ var Main = function(){
 
 	this.plotted = [];
    
-   this.contrast = 50;
+  this.contrast = 50;
+
+  this.filteredImageData = null;
+
+  this.svgData = null;
+
+  this.imageProcessed = false;
+  this.svgProcessed = false;
+
+  var _this = this;
+
+  $(window).bind('svgProcessed', function() {
+
+  	_this.svgProcessed = true;
+  	_this.initPixi();
+  });
+
+	$(window).bind('imageProcessed', function() {
+		_this.imageProcessed = true;
+  	_this.initPixi();
+  });  
 };
 
 /**
@@ -29,16 +52,20 @@ var Main = function(){
  * @public
  */
 Main.prototype.onReady = function() {
+
 	this.$canvas = $("#visible_canvas");
 	this.$originCanvas = $("#origin_canvas");
+	this.$svgCanvas = $('#svg_canvas');
 	this.ctx = this.$canvas[0].getContext('2d');
 	this.originctx = $("#origin_canvas")[0].getContext('2d');
+	this.svgctx = this.$svgCanvas[0].getContext('2d');
 
 	this.imgsrc = document.createElement('img');
 
 	//set the size
 	this.$canvas.attr('height', this.availH).attr('width', this.availW);
 	this.$originCanvas.attr('height', this.availH).attr('width', this.availW);
+	this.$svgCanvas.attr('height', this.availH).attr('width', this.availW);
 
 	var _this = this;
 	this.imgsrc.addEventListener("load", function () {
@@ -46,6 +73,80 @@ Main.prototype.onReady = function() {
 	}, false);
 
 	this.imgsrc.src = this.imgList[0];
+
+	var svg = new Image();
+	svg.src = this.svgList[0];
+	svg.width = '800';
+	svg.height = '800';
+
+	svg.onload = function(){
+    _this.svgctx.drawImage(svg,0,0, 600, 800);
+    _this.svgImageData = _this.$svgCanvas[0].toDataURL();
+    $(window).trigger('svgProcessed');
+	}
+
+
+};
+
+Main.prototype.initPixi = function() {
+	if(!this.imageProcessed || !this.svgProcessed) {
+		return;
+	}
+
+	$('#header').hide();
+	
+	this.renderer = new PIXI.autoDetectRenderer(this.availW, this.availH, {backgroundColor : 0xffffff});
+
+  // The renderer will create a canvas element for you that you can then insert into the DOM.
+  document.body.appendChild(this.renderer.view);
+
+  // You need to create a root container that will hold the scene you want to draw.
+  this.stage = new PIXI.Container();
+
+  this.photoContainer = new PIXI.Container();
+
+   // create a texture from an image path
+	var texture = PIXI.Texture.fromImage(this.filteredImageData);
+
+	var photo = new PIXI.Sprite(texture);
+
+
+	var shape = PIXI.Texture.fromImage(this.svgImageData);
+	var svg = new PIXI.Sprite(shape);
+		
+	svg.scale.x = 2;
+
+	this.photoContainer.addChild(photo);
+	//this.photoContainer.addChild(svg);
+
+	this.thing = new PIXI.Sprite(shape);
+	this.stage.addChild(this.thing);
+	this.thing.position.x = this.renderer.width / 2;
+	this.thing.position.y = this.renderer.height / 2;
+	//this.thing.lineStyle(0);
+
+	//this.photoContainer.mask = svg;
+
+	this.stage.addChild(this.photoContainer);
+
+	// start animating
+	this.animate();
+
+
+
+};
+
+Main.prototype.animate = function() {
+	var _this = this;
+	requestAnimationFrame(function() {
+		_this.animate();
+	});
+
+    // just for fun, let's rotate mr rabbit a little
+   // bunny.rotation += 0.1;
+
+    // render the container
+   this.renderer.render(this.stage);
 };
 
 Main.prototype.clearCanvas = function() {
@@ -83,7 +184,6 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		this.imgOffset.w = w;
 		this.imgOffset.h = h;
 
-		console.log(w, h);
 		this.ctx.drawImage(this.imgsrc,x,y, w, h);
 		this.originctx.drawImage(this.imgsrc,x,y,w ,h );
 		this.drawEverything();
@@ -138,10 +238,12 @@ Main.prototype.drawOriginalImageToCanvas = function() {
       			
  		 }
  		this.clearCanvas();
-  		this.ctx.putImageData(imageDataGrayscale,x,y);
-  		var data = this.$canvas[0].toDataURL();
+  	this.ctx.putImageData(imageDataGrayscale,x,y);
+  	this.filteredImageData = this.$canvas[0].toDataURL();
 
-  		//$('body').append('<img src="' + data + '" />');
+  	
+  	$(window).trigger('imageProcessed');
+  
 		
 };
 
