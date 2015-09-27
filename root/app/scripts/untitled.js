@@ -8,13 +8,10 @@
 var Main = function(){
 	this.imgList = [
  		"static/img/hands.jpg",     
-	];
+ 		
+   	];
 
-  this.svgList = [
-  	"static/svg/circle.svg",  
-  ];
-
-  this.imgOffset = {
+   	this.imgOffset = {
 		x : 0,
 		y : 0
 	};
@@ -24,28 +21,7 @@ var Main = function(){
 
 	this.plotted = [];
    
-	this.contrast = 50;
-
-	this.svg = null;
-
-  this.filteredImageData = null;
-
-  this.svgData = null;
-
-  this.imageProcessed = false;
-  this.svgProcessed = false;
-
-  var _this = this;
-
-  $(window).bind('svgProcessed', function() {
-  	_this.svgProcessed = true;
-  	_this.createComposite();
-  });
-
-	$(window).bind('imageProcessed', function() {
-		_this.imageProcessed = true;	
-		_this.createComposite();
-  });  
+   this.contrast = 50;
 };
 
 /**
@@ -56,16 +32,13 @@ Main.prototype.onReady = function() {
 	this.$canvas = $("#visible_canvas");
 	this.$originCanvas = $("#origin_canvas");
 	this.ctx = this.$canvas[0].getContext('2d');
-	this.$compositeCanvas = $('#composite_canvas');
 	this.originctx = $("#origin_canvas")[0].getContext('2d');
-	this.compositectx = this.$compositeCanvas[0].getContext('2d');
 
 	this.imgsrc = document.createElement('img');
 
 	//set the size
 	this.$canvas.attr('height', this.availH).attr('width', this.availW);
 	this.$originCanvas.attr('height', this.availH).attr('width', this.availW);
-	this.$compositeCanvas.attr('height', this.availH).attr('width', this.availW);
 
 	var _this = this;
 	this.imgsrc.addEventListener("load", function () {
@@ -73,15 +46,6 @@ Main.prototype.onReady = function() {
 	}, false);
 
 	this.imgsrc.src = this.imgList[0];
-
-	this.svg = new Image();
-	this.svg.src = this.svgList[0];
-	this.svg.width = '800';
-	this.svg.height = '800';
-
-	this.svg.onload = function(){
-    $(window).trigger('svgProcessed');
-	}
 };
 
 Main.prototype.clearCanvas = function() {
@@ -122,6 +86,7 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		console.log(w, h);
 		this.ctx.drawImage(this.imgsrc,x,y, w, h);
 		this.originctx.drawImage(this.imgsrc,x,y,w ,h );
+		this.drawEverything();
 		var imageData = this.ctx.getImageData(x,y,w,h); //get image data for image bounding box
   		var pixels = imageData.data;
   		var numPixels = pixels.length;
@@ -173,27 +138,42 @@ Main.prototype.drawOriginalImageToCanvas = function() {
       			
  		 }
  		this.clearCanvas();
-  	this.ctx.putImageData(imageDataGrayscale,x,y);
-		this.filteredImageData = this.ctx.getImageData(x,y,w,h);
+  		this.ctx.putImageData(imageDataGrayscale,x,y);
+  		var data = this.$canvas[0].toDataURL();
 
-  	
-  	$(window).trigger('imageProcessed');
+  		//$('body').append('<img src="' + data + '" />');
 		
 };
 
-Main.prototype.createComposite = function() {
+Main.prototype.drawEverything = function() {
 
-	if(!this.imageProcessed || !this.svgProcessed) {
-		return;
-	}
+		var w = this.availW;
+		var h = this.availH;
+		if( w == 0 && h == 0){
+			console.log(' ERRROR shape is 0x0')
+			return;
+		}
+		var dat = this.originctx.getImageData(0,0,w,h);
 
-	$('canvas').hide();
-	this.$compositeCanvas.show();
+		//empty it!
+		this.plotted = [];
+		// //dat = this.contrast(dat, 10);
+		//this.drawAvgColor(dat,this.ctx);
+		
+		// this.drawAvgFromDictChannels(dat,this.ctx, 15);
+		// this.drawAvgFromScaleDown(dat,this.ctx);
+		// find those unique colors that stand out from the background color average :
+		//var shapes = this.findGrayScaleShapes();
 
-	this.compositectx.putImageData(this.filteredImageData, 0, 0);
-	this.compositectx.globalCompositeOperation = "destination-in";
+		//if( this.devswitches.drawHorizon == true ){
+			// almost all images have a horizon find one...?
+		//}
 
-  this.compositectx.drawImage(this.svg,0,0, 800, 1000);
+		// // time to draw these shapes:
+		// if( this.devswitches.objectDetect == true ){
+		// 	console.log('\n\n ------ Draw defined objects ' + shapes.length );
+		// 	this.drawDefinedObjects(shapes);
+		// }
 
 };
 
