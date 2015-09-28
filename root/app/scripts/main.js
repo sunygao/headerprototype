@@ -10,13 +10,13 @@ var Main = function(){
  		"static/img/hands.jpg",  
  		"static/img/lana.jpg", 
  		"static/img/couple.jpg", 
- 		"static/img/party.jpg", 
+ 		"static/img/party.jpg"
 	];
 
   this.svgList = [
   	"static/svg/circle.svg",  
   	"static/svg/rectangle.svg",  
-  	"static/svg/triangle.svg" 
+  	 "static/svg/triangle.svg" 
   ];
 
   this.colorPairs = [
@@ -53,11 +53,9 @@ var Main = function(){
  // Math.random() * (max - min) + min
  	//var randomW = (Math.random() * (1.5 - .7) + .7);
  	//var randomH = (Math.random() * (1.2 - .5) + .5);
- 	var randomW = 1;
- 	var randomH = 1;
 	
-	this.availW = $('#header').width() * randomW;
-	this.availH = $('#header').outerHeight() * randomH;
+	this.availW = $('#header').width();
+	this.availH = $('#header').outerHeight();
 
 	this.contrast = 50;
 		
@@ -76,18 +74,6 @@ var Main = function(){
 
   this.svgWidth = 0;
   this.svgHeight = 0;
-
-  var _this = this;
-
-  $(window).bind('svgProcessed', function() {
-  	_this.svgProcessed = true;
-  	_this.createComposite();
-  });
-
-	$(window).bind('imageProcessed', function() {
-		_this.imageProcessed = true;	
-		_this.createComposite();
-  });  
 };
 
 /**
@@ -143,15 +129,17 @@ Main.prototype.createSvg = function() {
 
 		var x, y, w, h, ratio;
 
-		h = _this.imgOffset.h;
-		w = _this.svgWidth * h / _this.svgHeight;
-		x = (_this.availW - w) / 2;
+		w = _this.imgWidth;
+		h = _this.svg.height * w / _this.svg.width;
+		x = 0;
 		y = 0;
-				
+		
+		_this.svgWidth = w;
+		_this.svgHeight = h;
+
 		_this.svgctx.drawImage(_this.svg, x, y, w, h);
 
-		_this.createComposite(x, y, w, h);
-    //$(window).trigger('svgProcessed');
+		_this.createComposite();
 	}
 };
 
@@ -160,18 +148,18 @@ Main.prototype.clearCanvas = function() {
 };
 
 Main.prototype.drawOriginalImageToCanvas = function() {
-		this.imgWidth = this.imgsrc.width;
-		this.imgHeight = this.imgsrc.height;
+		var imgWidth = this.imgsrc.width;
+		var imgHeight = this.imgsrc.height;
 		
 		var w, h, ratio, x,y;
 		
 		ratio = this.availW/this.availH;
 
-		//size the image
-		var randomW = (Math.random() * (1.1 - .7) + .7);
+		//size the image to a random width
+		var randomW = (Math.random() * (.9 - .7) + .7);
 
 		w = this.availW * randomW;
-		h = this.imgHeight * w / this.imgWidth;
+		h = imgHeight * w / imgWidth;
 
 		if(w > h) {
 			this.imageRatio = 'landscape';
@@ -185,13 +173,13 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		y = 0;
 		this.imgOffset.x = x;
 		this.imgOffset.y = y;
-		this.imgOffset.w = w;
-		this.imgOffset.h = h;
+		this.imgWidth = w;
+		this.imgHeight = h;
 
 		//set size of the canvases to be the size of the image
 		this.$originCanvas.attr('height', h).attr('width', w);
 		this.$svgCanvas.attr('height', h).attr('width', w);
-		this.$compositeCanvas.attr('height', h).attr('width', w);
+		//this.$compositeCanvas.attr('height', h).attr('width', w);
 
 		//draw the image onto the origin canvas
 		this.originctx.drawImage(this.imgsrc, x, y, w,h);
@@ -241,7 +229,7 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		this.createSvg();
 };
 
-Main.prototype.createComposite = function(x, y, w, h) {
+Main.prototype.createComposite = function() {
 
 	$('canvas').hide();
 
@@ -250,14 +238,16 @@ Main.prototype.createComposite = function(x, y, w, h) {
 	$('#header').css('background-color', colorString);
 
 	this.$compositeCanvas.show();
+	var min = -(this.svgWidth/2);
+	var max = this.availW - (this.svgWidth/2);
+	var randomX = Math.random() * (max - min) + min;
 
-	this.compositectx.putImageData(this.filteredImageData, 0, 0);
+	this.compositectx.putImageData(this.filteredImageData, randomX, (this.availH - this.imgHeight) / 2);
 
 	this.compositectx.globalCompositeOperation = "destination-in";
+	
+	this.compositectx.drawImage(this.svg, randomX, (this.availH - this.svgHeight) /2, this.svgWidth, this.svgHeight);
 
-  this.compositectx.drawImage(this.svg, x, y, w, h);
-
-//this.compositectx.clearRect(0, 0, w, h);
 };
 
 
