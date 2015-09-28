@@ -45,13 +45,21 @@ var Main = function(){
 
   this.imgOffset = {
   	x: 0,
-  	y: 0
+  	y: 0,
+  	w: 0,
+  	h: 0
   };
-	this.availW = $('#header').width();
-	this.availH = $('#header').outerHeight();
+
+ // Math.random() * (max - min) + min
+ 	var randomW = (Math.random() * (1.5 - .7) + .7);
+ 	var randomH = (Math.random() * (1.2 - .5) + .5)
+	this.availW = $('#header').width() * randomW;
+	this.availH = $('#header').outerHeight() * randomH;
 
 	this.contrast = 50;
-
+	
+	console.log(randomW, randomH);
+	
 	this.svg = null;
 
   this.filteredImageData = null;
@@ -126,7 +134,6 @@ Main.prototype.createSvg = function() {
 	this.svg = new Image();
 	this.svg.src = this.randomSvg;
 	
-
 	var _this = this;
 
 	this.svg.onload = function() {
@@ -134,14 +141,21 @@ Main.prototype.createSvg = function() {
 		_this.svgHeight = _this.svg.height;
 
 		var x, y, w, h, ratio;
-	
-		w = _this.availW;
-		h = _this.svgHeight * w / _this.svgWidth;
 
-		x = 0;
-		y = _this.availH - h;
-
-		//_this.svgctx.drawImage(_this.svg, x, y, w, h);
+		if(_this.svgWidth > _this.svgHeight) {//landscape
+				h = _this.imgOffset.h;
+				w = _this.svgWidth * h / _this.svgHeight;
+				x = (_this.availW - w) / 2;
+				y = 0;
+		} else if(_this.svgHeight > _this.svgWidth) { //portrait
+				h = _this.imgOffset.h;
+				w = _this.svgWidth * h / _this.svgHeight;
+				x = (_this.availW - w) / 2;
+				//y = (_this.availH - h) / 2;
+				y = 0;
+		}
+				
+		_this.svgctx.drawImage(_this.svg, x, y, w, h);
 
 		_this.createComposite(x, y, w, h);
     //$(window).trigger('svgProcessed');
@@ -173,15 +187,16 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		}
 		// x = (this.availW - w)/2;
 		x = 0;
-		y = (this.availH - h)/2;
+		y = 0;
 		this.imgOffset.x = x;
 		this.imgOffset.y = y;
 		this.imgOffset.w = w;
 		this.imgOffset.h = h;
 
 		//set size of the canvases to be the size of the image
-		// this.$originCanvas.attr('height', h).attr('width', w);
-		// this.$compositeCanvas.attr('height', h).attr('width', w);
+		this.$originCanvas.attr('height', h).attr('width', w);
+		this.$svgCanvas.attr('height', h).attr('width', w);
+		this.$compositeCanvas.attr('height', h).attr('width', w);
 
 		//draw the image onto the origin canvas
 		this.originctx.drawImage(this.imgsrc, x, y, w,h);
