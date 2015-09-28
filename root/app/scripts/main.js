@@ -92,12 +92,14 @@ Main.prototype.getCanvases = function() {
 	this.$originCanvas = $("#origin_canvas");
 	this.$compositeCanvas = $('#composite_canvas');
 	this.$svgCanvas = $('#svg_canvas');
+	this.$paperCanvas = $('#paper_canvas');
 	this.originctx = this.$originCanvas[0].getContext('2d');
 	this.compositectx = this.$compositeCanvas[0].getContext('2d');
 	this.svgctx = this.$svgCanvas[0].getContext('2d');
 	this.$originCanvas.attr('height', this.availH).attr('width', this.availW);
 	this.$svgCanvas.attr('height', this.availH).attr('width', this.availW);
 	this.$compositeCanvas.attr('height', this.availH).attr('width', this.availW);
+	this.$paperCanvas.attr('height', this.availH).attr('width', this.availW);
 };
 
 Main.prototype.getRandomItems = function() {
@@ -248,8 +250,58 @@ Main.prototype.createComposite = function() {
 	
 	this.compositectx.drawImage(this.svg, randomX, (this.availH - this.svgHeight) /2, this.svgWidth, this.svgHeight);
 
+	var data = this.compositectx.getImageData(0, 0, this.availW, this.availH);
+	var pixels = data.data;
+	var numPixels = pixels.length;
+
+
+	//find bounding box of the final composite
+	//this is not perfect yet
+	var xMin = randomX;
+	var xMax;
+
+	if((xMin + this.svgWidth) > this.availW) {
+		xMax = this.availW;
+	} else {
+		xMax = xMin + this.svgWidth;
+	}
+
+//	this.createBackgroundShapes();
 };
 
+Main.prototype.createBackgroundShapes = function() {
+	this.$paperCanvas.show();
+	paper.install(window);
+
+	paper.setup(this.$paperCanvas[0]);
+	//var project = new Project();
+
+	var path = new Path.Circle(new Point(80, 50), 35);	
+	var topLeft = new Point(10, 20);
+	var rectSize = new Size(200, 100);
+	var rect = new Rectangle(topLeft, rectSize);
+
+	var path2 = new Path.Rectangle(new Point(80, 50), 35);	
+	path.strokeColor = 'black';
+	path2.strokeColor = 'black';
+	view.draw();
+
+	// var svg = new paper.Symbol(project.importSVG(this.randomSvg));
+	// var p = svg.place();
+	// p.position = new paper.Point(40, 100);
+
+
+// Create a symbol from the path:
+
+		
+	// var n = 20;
+	// while(n--){
+	// 	var p = a.place();
+	// 	p.position = new Point(n * 40, 100);
+	// 	p.scale(0.25 + Math.random() * 0.75);
+	// }
+	
+};
 
 var main = new Main();
 
