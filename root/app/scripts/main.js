@@ -15,6 +15,8 @@ var Main = function(){
 
   this.svgList = [
   	"static/svg/circle.svg",  
+  	"static/svg/rectangle.svg",  
+  	"static/svg/triangle.svg" 
   ];
 
   this.colorPairs = [
@@ -42,15 +44,12 @@ var Main = function(){
   ];
 
   this.imgOffset = {
-		x : 0,
-		y : 0
-	};
-
+  	x: 0,
+  	y: 0
+  };
 	this.availW = $('#header').width();
 	this.availH = $('#header').outerHeight();
 
-	this.plotted = [];
-   
 	this.contrast = 50;
 
 	this.svg = null;
@@ -61,6 +60,13 @@ var Main = function(){
 
   this.imageProcessed = false;
   this.svgProcessed = false;
+
+  this.imgWidth = 0;
+  this.imgHeight = 0;
+  this.imageOrientation = null;
+
+  this.svgWidth = 0;
+  this.svgHeight = 0;
 
   var _this = this;
 
@@ -80,144 +86,166 @@ var Main = function(){
  * @public
  */
 Main.prototype.onReady = function() {
-	this.$canvas = $("#visible_canvas");
+	this.getCanvases();
+
+	this.getRandomItems();
+
+	this.createImage();
+};
+
+Main.prototype.getCanvases = function() {
 	this.$originCanvas = $("#origin_canvas");
-	this.ctx = this.$canvas[0].getContext('2d');
 	this.$compositeCanvas = $('#composite_canvas');
-	this.originctx = $("#origin_canvas")[0].getContext('2d');
+	this.$svgCanvas = $('#svg_canvas');
+	this.originctx = this.$originCanvas[0].getContext('2d');
 	this.compositectx = this.$compositeCanvas[0].getContext('2d');
-
-	this.imgsrc = document.createElement('img');
-	//set the size
-	this.$canvas.attr('height', this.availH).attr('width', this.availW);
+	this.svgctx = this.$svgCanvas[0].getContext('2d');
 	this.$originCanvas.attr('height', this.availH).attr('width', this.availW);
-	
+	this.$svgCanvas.attr('height', this.availH).attr('width', this.availW);
+	this.$compositeCanvas.attr('height', this.availH).attr('width', this.availW);
+};
 
+Main.prototype.getRandomItems = function() {
+	this.randomColor =  this.colorPairs[Math.floor(Math.random() * this.colorPairs.length)];
+	this.randomImage =  this.imgList[Math.floor(Math.random() * this.imgList.length)];
+	this.randomSvg =  this.svgList[Math.floor(Math.random() * this.svgList.length)];
+};
+
+Main.prototype.createImage = function() {
+	this.imgsrc = document.createElement('img');
+	this.imgsrc.src = this.randomImage;
+	
 	var _this = this;
 	this.imgsrc.addEventListener("load", function () {
 		_this.drawOriginalImageToCanvas();
 	}, false);
 
-	this.randomColor =  this.colorPairs[Math.floor(Math.random() * this.colorPairs.length)];
-	this.randomImage =  this.imgList[Math.floor(Math.random() * this.imgList.length)];
-	
-	this.imgsrc.src = this.randomImage;
+};
 
+Main.prototype.createSvg = function() {
 	this.svg = new Image();
-	this.svg.src = this.svgList[0];
+	this.svg.src = this.randomSvg;
+	
 
-	this.svg.onload = function(){
-    $(window).trigger('svgProcessed');
+	var _this = this;
+
+	this.svg.onload = function() {
+		_this.svgWidth = _this.svg.width;
+		_this.svgHeight = _this.svg.height;
+
+		var x, y, w, h, ratio;
+	
+		w = _this.availW;
+		h = _this.svgHeight * w / _this.svgWidth;
+
+		x = 0;
+		y = _this.availH - h;
+
+		//_this.svgctx.drawImage(_this.svg, x, y, w, h);
+
+		_this.createComposite(x, y, w, h);
+    //$(window).trigger('svgProcessed');
 	}
 };
 
 Main.prototype.clearCanvas = function() {
-	this.ctx.clearRect(0,0,this.availW, this.availH);
 	this.originctx.clearRect(0,0,this.availW,this.availH);
 };
 
-
 Main.prototype.drawOriginalImageToCanvas = function() {
-		// stop previous animation:
-	var imgW = this.imgsrc.width,
-		imgH = this.imgsrc.height,
-		w = imgW,
-		h = imgH,
-		ratio, x,y;
-	
+		this.imgWidth = this.imgsrc.width;
+		this.imgHeight = this.imgsrc.height;
+		
+		var w, h, ratio, x,y;
 		
 		ratio = this.availW/this.availH;
-		w = imgW * ratio;
-		h = imgH * ratio;
-		x = (this.availW - w)/2;
+
+		//size the image
+		w = this.availW;
+		h = this.imgHeight * w / this.imgWidth;
+
+		if(w > h) {
+			this.imageRatio = 'landscape';
+		} else if(h > w) {
+			this.imageRatio = 'portrait';
+		} else if(h == w) {
+			this.imageRatio = 'square';
+		}
+		// x = (this.availW - w)/2;
+		x = 0;
 		y = (this.availH - h)/2;
 		this.imgOffset.x = x;
 		this.imgOffset.y = y;
 		this.imgOffset.w = w;
 		this.imgOffset.h = h;
 
-		this.$compositeCanvas.attr('height', h).attr('width', w);
-		$('#header').css({'height': h, 'width' : w, 'padding-bottom': 0});
+		//set size of the canvases to be the size of the image
+		// this.$originCanvas.attr('height', h).attr('width', w);
+		// this.$compositeCanvas.attr('height', h).attr('width', w);
 
-		this.ctx.drawImage(this.imgsrc,x,y, w, h);
-		this.originctx.drawImage(this.imgsrc,x,y,w ,h );
-		var imageData = this.ctx.getImageData(x,y,w,h); //get image data for image bounding box
-  		var pixels = imageData.data;
-  		var numPixels = pixels.length;
+		//draw the image onto the origin canvas
+		this.originctx.drawImage(this.imgsrc, x, y, w,h);
+
+		//get the image data
+		var imageData = this.originctx.getImageData(x,y,w,h); 
+  	var pixels = imageData.data;
+  	var numPixels = pixels.length;
   		
-  		//up the contrast
-  		var factor = (259 * (this.contrast + 255)) / (255 * (259 - this.contrast));
+		//formula for upping the contrast
+		var factor = (259 * (this.contrast + 255)) / (255 * (259 - this.contrast));
 
-  		for (var i = 0; i < numPixels; i+= 4) {
-  			var average = (pixels[i] + pixels[i+1] + pixels[i+2]) /3;
-  			
-  			// pixels[i] = average;
-     //  		pixels[i+1] = average;
-     //  		pixels[i+2] = average;
+		//turn the image to black and white, and bump up the contrast
+		for (var i = 0; i < numPixels; i+= 4) {
+			var average = (pixels[i] + pixels[i+1] + pixels[i+2]) /3;
+			pixels[i] = factor * (average - 128) + 128;
+    	pixels[i+1] = factor * (average - 128) + 128;
+    	pixels[i+2] = factor * (average - 128) + 128;
+		}
 
-  			pixels[i] = factor * (average - 128) + 128;
-      		pixels[i+1] = factor * (average - 128) + 128;
-      		pixels[i+2] = factor * (average - 128) + 128;
-      		//pixels[i+3] = 200;
-  		}
-  		this.clearCanvas();
-  		this.originctx.putImageData(imageData,x,y);
+		this.clearCanvas();
 
-  		var imageDataGrayscale = this.originctx.getImageData(x,y,w,h);
-  		var grayPixels = imageDataGrayscale.data;
-  		var numPixelsGray = grayPixels.length;
+		//black and white image
+		this.originctx.putImageData(imageData,x,y);
 
+		var imageDataGrayscale = this.originctx.getImageData(x,y,w,h);
+		var grayPixels = imageDataGrayscale.data;
+		var numPixelsGray = grayPixels.length;
+
+		//colorize the black and white photo
 		for (var i = 0; i < numPixelsGray; i++) {
-      		var average = (pixels[i*4] + pixels[i*4+1] + pixels[i*4+2]) /3;
-      		// set red green and blue pixels to the average value
-      		
-      		//pixels[i*4+3] = Math.abs(average - 255);
+  		var average = (pixels[i*4] + pixels[i*4+1] + pixels[i*4+2]) /3;		
+	    grayPixels[i*4] = this.randomColor.color1[0];
+	    grayPixels[i*4+1] = this.randomColor.color1[1];
+	    grayPixels[i*4+2] =  this.randomColor.color1[2];
+	    grayPixels[i*4+3] = Math.abs(average - 255);
+		}
 
-      		
+		this.clearCanvas();
 
-      		//if(average > 127) { //lighter half of image
-      			grayPixels[i*4] = this.randomColor.color1[0];
-      			grayPixels[i*4+1] = this.randomColor.color1[1];
-      			grayPixels[i*4+2] =  this.randomColor.color1[2];
-      			grayPixels[i*4+3] = Math.abs(average - 255);
-      			//grayPixels[i*4+3] =average;
-      		// } else {
-      		// 	grayPixels[i*4] = 254;
-      		// 	grayPixels[i*4+1] = 96;
-      		// 	grayPixels[i*4+2] = 10;
-      		// 	grayPixels[i*4+3] = average;
-      		// }
+		this.originctx.putImageData(imageDataGrayscale,x,y);
 
-      		//254 96 10
-      			
- 		 }
- 		this.clearCanvas();
-  	this.ctx.putImageData(imageDataGrayscale,x,y);
-		this.filteredImageData = this.ctx.getImageData(x,y,w,h);
+		//get image data of the colorized image
+		this.filteredImageData = this.originctx.getImageData(0,0, w,h);
 
-  	
-  	$(window).trigger('imageProcessed');
-		
+		//create the svg canvas
+		this.createSvg();
 };
 
-Main.prototype.createComposite = function() {
-
-	if(!this.imageProcessed || !this.svgProcessed) {
-		return;
-	}
+Main.prototype.createComposite = function(x, y, w, h) {
 
 	$('canvas').hide();
 
 	var colorString = 'rgba(' + this.randomColor.color2[0] + ', ' + this.randomColor.color2[1] + ', ' +  this.randomColor.color2[2] + ', .8)';
-	console.log(colorString);
+	
 	$('#header').css('background-color', colorString);
 
 	this.$compositeCanvas.show();
 
 	this.compositectx.putImageData(this.filteredImageData, 0, 0);
+
 	this.compositectx.globalCompositeOperation = "destination-in";
 
-  this.compositectx.drawImage(this.svg,$('#header').width()/50, 0, 500, 600);
+  this.compositectx.drawImage(this.svg, x, y, w, h);
 
 };
 
