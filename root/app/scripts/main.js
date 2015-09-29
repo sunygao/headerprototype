@@ -22,23 +22,48 @@ var Main = function(){
   this.colorPairs = [
   	{
   		color1: [254, 91, 10],
-  		color2: [255, 202, 251]
+  		color2: [255, 202, 251],
+  		supportingColors: [
+  			[244, 176, 160],
+  			[190, 190, 190],
+  			[228, 211, 246]
+  		]
   	},
   	{
   		color1: [58, 112, 221],
-  		color2: [245, 232, 211]
+  		color2: [245, 232, 211],
+  		supportingColors: [
+  			[244, 176, 160],
+  			[190, 190, 190],
+  			[228, 211, 246]
+  		]
   	},
   	{
   		color1: [37, 145, 11],
-  		color2: [236, 227, 164]
+  		color2: [236, 227, 164],
+  		supportingColors: [
+  			[244, 176, 160],
+  			[190, 190, 190],
+  			[228, 211, 246]
+  		]
   	},
   	{
   		color1: [168, 124, 241],
-  		color2: [242, 148, 148]
+  		color2: [242, 148, 148],
+  		supportingColors: [
+  			[244, 176, 160],
+  			[190, 190, 190],
+  			[228, 211, 246]
+  		]
   	},
   	{
   		color1: [241, 124, 231],
-  		color2: [211, 245, 231]
+  		color2: [211, 245, 231],
+  		supportingColors: [
+  			[255, 255, 255],
+  			[190, 190, 190],
+  			[131, 222, 208]
+  		]
   	}
 
   ];
@@ -48,6 +73,11 @@ var Main = function(){
   	y: 0,
   	w: 0,
   	h: 0
+  };
+
+  this.compositeBoundaries = {
+  	min: 0,
+  	max: 0
   };
 
  // Math.random() * (max - min) + min
@@ -92,10 +122,11 @@ Main.prototype.getCanvases = function() {
 	this.$originCanvas = $("#origin_canvas");
 	this.$compositeCanvas = $('#composite_canvas');
 	this.$svgCanvas = $('#svg_canvas');
-	this.$paperCanvas = $('#paper_canvas');
+	this.$paperCanvas = $('#background_canvas');
 	this.originctx = this.$originCanvas[0].getContext('2d');
 	this.compositectx = this.$compositeCanvas[0].getContext('2d');
 	this.svgctx = this.$svgCanvas[0].getContext('2d');
+	this.paperctx = this.$paperCanvas[0].getContext('2d');
 	this.$originCanvas.attr('height', this.availH).attr('width', this.availW);
 	this.$svgCanvas.attr('height', this.availH).attr('width', this.availW);
 	this.$compositeCanvas.attr('height', this.availH).attr('width', this.availW);
@@ -139,7 +170,7 @@ Main.prototype.createSvg = function() {
 		_this.svgWidth = w;
 		_this.svgHeight = h;
 
-		_this.svgctx.drawImage(_this.svg, x, y, w, h);
+		//_this.svgctx.drawImage(_this.svg, x, y, w, h);
 
 		_this.createComposite();
 	}
@@ -180,7 +211,7 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 
 		//set size of the canvases to be the size of the image
 		this.$originCanvas.attr('height', h).attr('width', w);
-		this.$svgCanvas.attr('height', h).attr('width', w);
+	//	this.$svgCanvas.attr('height', h).attr('width', w);
 		//this.$compositeCanvas.attr('height', h).attr('width', w);
 
 		//draw the image onto the origin canvas
@@ -223,6 +254,12 @@ Main.prototype.drawOriginalImageToCanvas = function() {
 		this.clearCanvas();
 
 		this.originctx.putImageData(imageDataGrayscale,x,y);
+		this.originctx.globalCompositeOperation = "destination-over";
+
+		//set a background color to the canvas
+		this.originctx.rect(x, y, w, h);
+		this.originctx.fillStyle='rgba(' + this.randomColor.color2[0] + ', ' + this.randomColor.color2[1] + ', ' + this.randomColor.color2[2] + ', 1)';
+		this.originctx.fill();
 
 		//get image data of the colorized image
 		this.filteredImageData = this.originctx.getImageData(0,0, w,h);
@@ -255,51 +292,49 @@ Main.prototype.createComposite = function() {
 	var numPixels = pixels.length;
 
 
-	//find bounding box of the final composite
+	//find bounding box of the final composite so we can put stuff around it
 	//this is not perfect yet
-	var xMin = randomX;
-	var xMax;
+	this.compositeBoundaries.min = randomX;
 
-	if((xMin + this.svgWidth) > this.availW) {
-		xMax = this.availW;
+	if((this.compositeBoundaries.min + this.svgWidth) > this.availW) {
+		this.compositeBoundaries.max = this.availW;
 	} else {
-		xMax = xMin + this.svgWidth;
+		this.compositeBoundaries.max = this.compositeBoundaries.min + this.svgWidth;
 	}
 
-//	this.createBackgroundShapes();
+	this.createBackgroundShapes();
 };
 
 Main.prototype.createBackgroundShapes = function() {
-	this.$paperCanvas.show();
-	paper.install(window);
+	var numOfObjects = Math.floor(Math.random() * (4 - 2) + 2);
+	for (var i = 0; i < numOfObjects; i++) {
+		var randomWidth = this.svgWidth * (Math.random() * (.4 - .1) + .1);
+		var height = this.svgHeight * randomWidth / this.svgWidth;
+		var xPosArray = [
+			Math.random() * this.compositeBoundaries.min,
+			Math.random() * (this.availW - this.compositeBoundaries.max) + this.compositeBoundaries.max
+		];
+		var xPos = xPosArray[Math.floor(Math.random() * xPosArray.length)];
+		var yPos = Math.random() * (this.availH - height);
+		var randomColor = this.randomColor.supportingColors[Math.floor(Math.random() * this.randomColor.supportingColors.length)];
 
-	paper.setup(this.$paperCanvas[0]);
-	//var project = new Project();
+		//this.paperctx.clearRect(0,0,this.availW,this.availH);
+		this.paperctx.drawImage(this.svg, xPos, yPos, randomWidth, height);		
 
-	var path = new Path.Circle(new Point(80, 50), 35);	
-	var topLeft = new Point(10, 20);
-	var rectSize = new Size(200, 100);
-	var rect = new Rectangle(topLeft, rectSize);
+		var imageData = this.paperctx.getImageData(xPos, yPos, randomWidth, height); 
+  	var pixels = imageData.data;
+  	var numPixels = pixels.length;
+  		
+		for (var j = 0; j < numPixels; j+= 4) {
+			pixels[j] = randomColor[0];
+    	pixels[j+1] = randomColor[1];
+    	pixels[j+2] = randomColor[2];
+    	// pixels[j+3] = Math.random() * 255;
+		}
+		this.svgctx.putImageData(imageData, xPos, yPos);	
+	}
 
-	var path2 = new Path.Rectangle(new Point(80, 50), 35);	
-	path.strokeColor = 'black';
-	path2.strokeColor = 'black';
-	view.draw();
-
-	// var svg = new paper.Symbol(project.importSVG(this.randomSvg));
-	// var p = svg.place();
-	// p.position = new paper.Point(40, 100);
-
-
-// Create a symbol from the path:
-
-		
-	// var n = 20;
-	// while(n--){
-	// 	var p = a.place();
-	// 	p.position = new Point(n * 40, 100);
-	// 	p.scale(0.25 + Math.random() * 0.75);
-	// }
+	this.$svgCanvas.show();
 	
 };
 
