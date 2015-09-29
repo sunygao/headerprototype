@@ -287,6 +287,14 @@ Main.prototype.createComposite = function() {
 	
 	this.compositectx.drawImage(this.svg, randomX, (this.availH - this.svgHeight) /2, this.svgWidth, this.svgHeight);
 
+	this.compositectx.globalCompositeOperation = "destination-over";
+
+	//set a background color to the canvas
+	this.compositectx.rect(0, 0, this.availW, this.availH);
+	this.compositectx.fillStyle='rgba(' + this.randomColor.color2[0] + ', ' + this.randomColor.color2[1] + ', ' + this.randomColor.color2[2] + ', 1)';
+	this.compositectx.fill();
+
+
 	var data = this.compositectx.getImageData(0, 0, this.availW, this.availH);
 	var pixels = data.data;
 	var numPixels = pixels.length;
@@ -307,6 +315,7 @@ Main.prototype.createComposite = function() {
 
 Main.prototype.createBackgroundShapes = function() {
 	var numOfObjects = Math.floor(Math.random() * (4 - 2) + 2);
+	//var numOfObjects = 2;
 	for (var i = 0; i < numOfObjects; i++) {
 		var randomWidth = this.svgWidth * (Math.random() * (.4 - .1) + .1);
 		var height = this.svgHeight * randomWidth / this.svgWidth;
@@ -315,13 +324,18 @@ Main.prototype.createBackgroundShapes = function() {
 			Math.random() * (this.availW - this.compositeBoundaries.max) + this.compositeBoundaries.max
 		];
 		var xPos = xPosArray[Math.floor(Math.random() * xPosArray.length)];
+		//var xPos = (i + 1) * 80;
 		var yPos = Math.random() * (this.availH - height);
+		//var yPos = 0;
+		//randomWidth = 100;
+		//height = 100;
 		var randomColor = this.randomColor.supportingColors[Math.floor(Math.random() * this.randomColor.supportingColors.length)];
 
-		//this.paperctx.clearRect(0,0,this.availW,this.availH);
+		this.paperctx.clearRect(0,0,this.availW,this.availH);
 		this.paperctx.drawImage(this.svg, xPos, yPos, randomWidth, height);		
 
 		var imageData = this.paperctx.getImageData(xPos, yPos, randomWidth, height); 
+		
   	var pixels = imageData.data;
   	var numPixels = pixels.length;
   		
@@ -331,7 +345,15 @@ Main.prototype.createBackgroundShapes = function() {
     	pixels[j+2] = randomColor[2];
     	// pixels[j+3] = Math.random() * 255;
 		}
-		this.svgctx.putImageData(imageData, xPos, yPos);	
+
+		this.paperctx.clearRect(0,0,this.availW,this.availH);	
+		this.paperctx.putImageData(imageData, xPos, yPos); 
+		// /this.paperctx.clearRect(0,0,this.availW,this.availH);
+		//this.compositectx.globalCompositeOperation = "destination-out";
+		//this.compositectx.putImageData(imageData, xPos, yPos);	
+		this.compositectx.globalCompositeOperation = 'source-over';
+		this.svgctx.drawImage(this.$paperCanvas[0], 0, 0);	
+		this.compositectx.drawImage(this.$paperCanvas[0], 0, 0);		
 	}
 
 	this.$svgCanvas.show();
