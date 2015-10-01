@@ -6,7 +6,7 @@
  */
 
 var Displacement = function(){
-	this.$el = $('#header3');
+	this.$el = $('#header2');
 	this.availW = this.$el.width();
 	this.availH = this.$el.outerHeight();
 	this.bgUrl = 'static/img/mountains.jpg';

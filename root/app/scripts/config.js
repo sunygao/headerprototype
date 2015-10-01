@@ -14,9 +14,39 @@ var Config = function() {
       "static/img/party.jpg"
     ],
     svgList : [
-      "static/svg/circle.svg",  
-      "static/svg/rectangle.svg",  
-      "static/svg/triangle.svg" 
+      //"static/svg/circle.svg",  
+      "static/svg/rectangle.svg", 
+      "static/svg/rectangle2.svg", 
+      "static/svg/rectangle3.svg",  
+      "static/svg/triangle.svg",
+      "static/svg/triangle2.svg",
+      "static/svg/triangle3.svg" 
+    ],
+    colorArray: [
+      [
+        [244, 176, 160],
+        [190, 190, 190],
+        [228, 211, 246],
+        [254, 91, 10]
+      ],
+      [
+        [244, 176, 160],
+        [190, 190, 190],
+        [228, 211, 246],
+        [245, 232, 211]
+      ],
+      [
+        [244, 176, 160],
+        [190, 190, 190],
+        [228, 211, 246],
+        [245, 232, 211]
+      ],
+      [
+        [255, 255, 255],
+        [190, 190, 190],
+        [131, 222, 208],
+        [211, 245, 231]
+      ]
     ],
     colorPairs: [
       {
