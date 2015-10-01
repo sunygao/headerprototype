@@ -19,6 +19,7 @@ var Displacement = function(){
 	this.colorOffset = 0;
 	this.maskedPhoto = null;
 	this.hideVideo = false;
+	this.photoShown = false;
 };
 
 /**
@@ -60,31 +61,26 @@ Displacement.prototype.loadAssets = function() {
 Displacement.prototype.onAssetsLoaded = function() {
 	this.container = new PIXI.Container();
 	this.photoContainer = new PIXI.Container();
+	this.photoContainer.alpha = 0;
 	this.videoContainer = new PIXI.Container();
 
 	this.container.alpha = 0;
 
 	this.createBackground();
 	this.createBgFilters();
-	//this.addVideo();
-	// this.addPhoto();
+	this.addPhoto();
 
 	this.stage.addChild(this.container);
-	this.stage.addChild(this.videoContainer);
 	this.stage.addChild(this.photoContainer);
-   	
+	this.stage.addChild(this.videoContainer);
+	   	
     this.renderer.render(this.stage);
    
    	this.animate(); 
 };
 
-Displacement.prototype.addVideo = function() {
-	
-	
-};
 
 Displacement.prototype.createBackground = function() {
-	
 	var _this = this;
 	var bg = new PIXI.Sprite.fromImage(this.bgUrl);
 	var ogW = bg.width;
@@ -94,44 +90,37 @@ Displacement.prototype.createBackground = function() {
     bg.scale.x = this.scaleLandscape(ogW, ogH).w;
     bg.scale.y = this.scaleLandscape(ogW, ogH).h;
     bg.anchor = new PIXI.Point(0.5, 0.5);
- 
+ 	this.blurFilter = new PIXI.filters.BlurFilter();
     this.container.addChild(bg);
    
-    var video = document.createElement('video');
+    this.video = document.createElement('video');
     var duration;
 	//video.loop = true;              
-	video.src = this.videoUrl;
-	video.addEventListener('play', function() {
-		_this.container.alpha = 1;
+	this.video.src = this.videoUrl;
+	this.video.addEventListener('playing', function() {
+		//_this.container.alpha = 1;
+		_this.photoContainer.alpha = 1;	
 	});
-	video.addEventListener('loadedmetadata', function() {
-		duration = video.duration;
+	this.video.addEventListener('loadedmetadata', function() {
+		duration = _this.video.duration;
 	});
-	video.addEventListener('timeupdate', function(e) {
-		if(video.currentTime >= duration - 5) {
+	this.video.addEventListener('timeupdate', function(e) {
+		if(_this.video.currentTime >= duration - 6) {
 			_this.hideVideo = true;
 		}
 	});
 
+	var texture = PIXI.Texture.fromVideo(this.video);
+	this.videoSprite = new PIXI.Sprite(texture);
 
-	var texture = PIXI.Texture.fromVideo(video);
-	var videoSprite = new PIXI.Sprite(texture);
-
-	videoSprite.width = this.renderer.width * 2;
-	videoSprite.height = this.renderer.height * 2;
-	videoSprite.anchor = new PIXI.Point(0.5, 0);
+	this.videoSprite.width = this.renderer.width * 2;
+	this.videoSprite.height = this.renderer.height * 2;
+	this.videoSprite.anchor = new PIXI.Point(0.5, 0);
 	var invertFilter = new PIXI.filters.InvertFilter();
 
-	//videoSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-	//videoSprite.filters = [invertFilter];
-	videoSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-	//bg.mask = videoSprite;
-	
-	
-	this.videoContainer.addChild(videoSprite);
-	
-
-
+	this.videoSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+		
+	this.videoContainer.addChild(this.videoSprite);
 };
 
 Displacement.prototype.createBgFilters = function() {
@@ -143,7 +132,7 @@ Displacement.prototype.createBgFilters = function() {
     this.colorFilter.desaturate(true);
     
    	this.container.addChild(this.displacementSprite);
-   	this.container.filters = [this.colorFilter, this.displacementFilter];
+   	this.container.filters = [this.colorFilter, this.displacementFilter, this.blurFilter];
 };
 
 Displacement.prototype.addPhoto = function() {
@@ -158,14 +147,22 @@ Displacement.prototype.addPhoto = function() {
     photo.scale.x = this.scalePortrait(photoTexture.width, photoTexture.height).w;
     photo.scale.y = this.scalePortrait(photoTexture.width, photoTexture.height).h;
     this.photoContainer.addChild(photo);
+    //photo.blendMode = PIXI.BLEND_MODES.DARKEN;
+  	this.photoContainer.filters = [this.colorFilter];
 };
 
 Displacement.prototype.animate = function() {
 	var _this = this;
-	
-	if(this.hideVideo && this.videoContainer.alpha > 0) {
-		this.videoContainer.alpha -= .01;
+	this.videoSprite.width += 10;
+	this.videoSprite.height += 10;
+	if(this.hideVideo) {
+		this.videoContainer.alpha -= .5;
 	}
+
+	if(this.videoContainer.alpha <= 0 && this.container.alpha <= 1) {
+		this.container.alpha += .05;
+	}
+
 	this.displacementFilter.scale.x = this.currentoffset;
 	this.displacementFilter.scale.y = this.currentoffset;
 	this.currentoffset += this.offsetIncrement;
