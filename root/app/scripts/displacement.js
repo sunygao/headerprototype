@@ -20,6 +20,24 @@ var Displacement = function(){
 	this.maskedPhoto = null;
 	this.hideVideo = false;
 	this.photoShown = false;
+	
+
+	this.vertices = [];
+	this.vertices.push({
+	    x: 200,
+	    y: -20
+	});
+	this.vertices.push({
+	    x: this.availW/2,
+	    y: this.availH
+	});
+	this.vertices.push({
+	   	x: this.availW - 200,
+	    y: -20
+	});
+
+
+	this.curTime = 1;
 };
 
 /**
@@ -35,6 +53,11 @@ Displacement.prototype.initialize = function() {
 	$(window).bind('compositeCreated', function() {
 		_this.maskedPhoto = photoMask.getData();
 	});
+
+	$(window).bind('filteredImageCreated', function() {
+		_this.filteredPhoto = photoMask.getFilteredImage();
+	});
+
 
 	this.renderer = PIXI.autoDetectRenderer(this.availW, this.availH, { transparent: true });
 
@@ -61,22 +84,65 @@ Displacement.prototype.loadAssets = function() {
 Displacement.prototype.onAssetsLoaded = function() {
 	this.container = new PIXI.Container();
 	this.photoContainer = new PIXI.Container();
+	this.maskContainer = new PIXI.Container();
+	this.shapeContainer = new PIXI.Container();
 	this.photoContainer.alpha = 0;
 	this.videoContainer = new PIXI.Container();
 
-	this.container.alpha = 0;
+	//this.container.alpha = 0;
 
 	this.createBackground();
 	this.createBgFilters();
 	this.addPhoto();
+	this.createShape();
 
 	this.stage.addChild(this.container);
-	this.stage.addChild(this.photoContainer);
+	//this.stage.addChild(this.photoContainer);
 	this.stage.addChild(this.videoContainer);
-	   	
-    this.renderer.render(this.stage);
-   
-   	this.animate(); 
+	this.stage.addChild(this.shapeContainer);
+	this.stage.addChild(this.maskContainer);
+	
+  this.renderer.render(this.stage);
+ 
+ 	var points = calcWaypoints(this.vertices);
+ 	this.animate(points); 
+};
+
+Displacement.prototype.createShape = function() {
+	// create a new graphics object
+	var img = new Image();
+	img.src = this.filteredPhoto;
+  var base =  new PIXI.BaseTexture(img);
+  var photoTexture = new PIXI.Texture(base);
+  var photo = new PIXI.Sprite(photoTexture);
+  
+  photo.anchor = new PIXI.Point(0.5, 0);
+  photo.scale.x = this.scaleLandscape(photoTexture.width, photoTexture.height).w;
+  photo.scale.y = photo.scale.x;
+  photo.position.x = this.availW*0.5;
+  photo.position.y = (this.availH * .5) - (photo.height * .5) // - photo.height;
+  //this.photoContainer.addChild(photo);
+	//this.photoContainer.filters = [this.colorFilter];
+	this.shape = new PIXI.Graphics();
+	this.shapeOutline = new PIXI.Graphics();
+	 
+	this.shapeOutline.lineStyle(5, 0xff0000, 1);
+	this.shapeOutline.moveTo(200, -20);
+
+	this.shape.moveTo(200, -20);
+
+	this.shape.beginFill(0x8bc5ff, 0.4);
+	for (var i = 0; i < this.vertices.length; i++) {
+		this.shape.lineTo(this.vertices[i].x, this.vertices[i].y);
+	}
+	this.shape.endFill();
+
+	photo.mask = this.shape;
+	this.maskContainer.alpha = 0;
+	this.maskContainer.addChild(photo);
+	// add it the stage so we see it on our screens..
+	this.maskContainer.addChild(this.shape);
+	this.shapeContainer.addChild(this.shapeOutline);
 };
 
 
@@ -125,14 +191,14 @@ Displacement.prototype.createBackground = function() {
 
 Displacement.prototype.createBgFilters = function() {
 	this.displacementSprite = PIXI.Sprite.fromImage(this.displacementUrl);
-    this.displacementSprite.scale.x = this.scaleLandscape(this.displacementSprite.width, this.displacementSprite.height).w;
-    this.displacementSprite.scale.y = this.scaleLandscape(this.displacementSprite.width, this.displacementSprite.height).h;
-    this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
-    this.colorFilter = new PIXI.filters.ColorMatrixFilter();
-    this.colorFilter.desaturate(true);
-    
-   	this.container.addChild(this.displacementSprite);
-   	this.container.filters = [this.colorFilter, this.displacementFilter, this.blurFilter];
+  this.displacementSprite.scale.x = this.scaleLandscape(this.displacementSprite.width, this.displacementSprite.height).w;
+  this.displacementSprite.scale.y = this.scaleLandscape(this.displacementSprite.width, this.displacementSprite.height).h;
+  this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
+  this.colorFilter = new PIXI.filters.ColorMatrixFilter();
+  this.colorFilter.desaturate(true);
+  
+ 	this.container.addChild(this.displacementSprite);
+ 	this.container.filters = [this.colorFilter, this.displacementFilter, this.blurFilter];
 };
 
 Displacement.prototype.addPhoto = function() {
@@ -151,7 +217,7 @@ Displacement.prototype.addPhoto = function() {
   	this.photoContainer.filters = [this.colorFilter];
 };
 
-Displacement.prototype.animate = function() {
+Displacement.prototype.animate = function(points) {
 	var _this = this;
 	this.videoSprite.width += 10;
 	this.videoSprite.height += 10;
@@ -160,29 +226,38 @@ Displacement.prototype.animate = function() {
 	}
 
 	if(this.videoContainer.alpha <= 0 && this.container.alpha <= 1) {
-		this.container.alpha += .05;
+		//this.container.alpha += .05;
+	}
+	if(this.displacementSprite) {
+		this.displacementFilter.scale.x = this.currentoffset;
+		this.displacementFilter.scale.y = this.currentoffset;
 	}
 
-	this.displacementFilter.scale.x = this.currentoffset;
-	this.displacementFilter.scale.y = this.currentoffset;
 	this.currentoffset += this.offsetIncrement;
 
 	this.colorOffset += .5;
-    //var matrix = this.colorFilter.matrix;
-    this.colorFilter.hue(this.colorOffset);
+  //var matrix = this.colorFilter.matrix;
+  this.colorFilter.hue(this.colorOffset);
 
-    // matrix[1] = Math.sin(this.colorOffset) * 3;
-    // matrix[2] = Math.cos(this.colorOffset);
-    // matrix[3] = Math.cos(this.colorOffset) * 1.5;
-    // matrix[4] = Math.sin(this.colorOffset / 3) * 2;
-    // matrix[5] = Math.sin(this.colorOffset / 2);
-    // matrix[6] = Math.sin(this.colorOffset / 4);
+  this.animateLine(points);
+	if (this.curTime < points.length) {
+		this.shapeOutline.moveTo(points[this.curTime - 1].x, points[this.curTime - 1].y);
+	  this.shapeOutline.lineTo(points[this.curTime].x, points[this.curTime].y);
+	} else {
+		this.maskContainer.alpha = 1;
+	}
+
+  this.curTime++;
 
 	this.renderer.render(this.stage);
 
-	requestAnimationFrame(function() {
-		_this.animate();
+  requestAnimationFrame(function() {
+		_this.animate(points);
 	});
+};
+
+Displacement.prototype.animateLine = function() {
+
 };
 
 Displacement.prototype.scaleLandscape = function(ogW, ogH) {
@@ -198,4 +273,23 @@ Displacement.prototype.scalePortrait = function(ogW, ogH) {
 
     return { w: newW, h: newH };
 };
+
+function calcWaypoints(vertices) {
+    var waypoints = [];
+    for (var i = 1; i < vertices.length; i++) {
+        var pt0 = vertices[i - 1];
+        var pt1 = vertices[i];
+        var dx = pt1.x - pt0.x;
+        var dy = pt1.y - pt0.y;
+        for (var j = 0; j < 100; j++) {
+            var x = pt0.x + dx * j / 100;
+            var y = pt0.y + dy * j / 100;
+            waypoints.push({
+                x: x,
+                y: y
+            });
+        }
+    }
+    return (waypoints);
+}
 

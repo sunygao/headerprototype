@@ -154,6 +154,9 @@ PhotoMask.prototype.drawOriginalImageToCanvas = function() {
 		//get image data of the colorized image
 		this.filteredImageData = this.originctx.getImageData(0,0, w,h);
 
+		this.filteredImage = this.$originCanvas[0].toDataURL();
+		$(window).trigger('filteredImageCreated');
+
 		//create the svg canvas
 		this.createSvg();
 };
@@ -188,6 +191,11 @@ PhotoMask.prototype.createComposite = function() {
 
 	$(window).trigger('compositeCreated');
 	
+};
+
+
+PhotoMask.prototype.getFilteredImage = function() {
+	return this.filteredImage;
 };
 
 PhotoMask.prototype.getData = function() {
