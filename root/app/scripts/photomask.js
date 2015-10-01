@@ -58,6 +58,10 @@ PhotoMask.prototype.getRandomItems = function() {
 	this.randomSvg =  this.svgList[Math.floor(Math.random() * this.svgList.length)];
 };
 
+PhotoMask.prototype.getColor = function() {
+	return this.randomColor;
+};
+
 PhotoMask.prototype.createImage = function() {
 	this.imgsrc = document.createElement('img');
 	this.imgsrc.src = this.randomImage;

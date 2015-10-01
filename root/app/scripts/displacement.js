@@ -55,6 +55,20 @@ Displacement.prototype.initialize = function() {
 	$(window).bind('filteredImageCreated', function() {
 		_this.filteredPhoto = photoMask.getFilteredImage();
 	});
+	var colorString = 'rgba(' + photoMask.getColor().color1[0] + ', ' + photoMask.getColor().color1[1] + ' , ' + photoMask.getColor().color1[2] + ', 1)'
+	this.color = rgb2hex(colorString);
+
+	$(window).one('lineDone', function() {
+		// this.maskContainer.alpha = 1;
+		// this.shapeOutline.alpha = 0;
+
+		TweenMax.to(_this.maskContainer, .5, {
+			alpha: 1
+		});
+		TweenMax.to(_this.shapeOutline, .5, {
+			alpha: 0
+		});
+	});
 
 
 	this.renderer = PIXI.autoDetectRenderer(this.availW, this.availH, { transparent: true });
@@ -123,8 +137,8 @@ Displacement.prototype.createShape = function() {
 	
 	this.shape = new PIXI.Graphics();
 	this.shapeOutline = new PIXI.Graphics();
-	 
-	this.shapeOutline.lineStyle(5, 0xffffff, 1);
+	console.log(this.color);
+	this.shapeOutline.lineStyle(5, '0x' + this.color, 1);
 	this.shapeOutline.moveTo(200, -20);
 
 	this.shape.moveTo(200, -20);
@@ -173,7 +187,9 @@ Displacement.prototype.createBackground = function() {
 	});
 	this.video.addEventListener('timeupdate', function(e) {
 		if(_this.video.currentTime >= duration - 6) {
-			_this.hideVideo = true;
+			TweenMax.to(_this.videoContainer, 1, {
+				alpha: 0
+			});
 		}
 	});
 
@@ -222,6 +238,7 @@ Displacement.prototype.animate = function(points) {
 	var _this = this;
 	this.videoSprite.width += 10;
 	this.videoSprite.height += 10;
+
 	if(this.hideVideo) {
 		this.videoContainer.alpha -= .5;
 	}
@@ -244,9 +261,8 @@ Displacement.prototype.animate = function(points) {
 	if (this.curTime < points.length) {
 		this.shapeOutline.moveTo(points[this.curTime - 1].x, points[this.curTime - 1].y);
 	  this.shapeOutline.lineTo(points[this.curTime].x, points[this.curTime].y);
-	} else {
-		this.maskContainer.alpha = 1;
-		this.shapeOutline.alpha = 0;
+	} else {	
+		$(window).trigger('lineDone');
 	}
 
   this.curTime++;
@@ -297,7 +313,7 @@ function calcWaypoints(vertices) {
 
 function rgb2hex(rgb){
  rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
- return (rgb && rgb.length === 4) ? "#" +
+ return (rgb && rgb.length === 4) ? "" +
   ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
   ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
   ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
