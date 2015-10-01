@@ -43,6 +43,10 @@ PhotoMask.prototype.createMaskedImage = function() {
 	this.createImage();
 };
 
+PhotoMask.prototype.getColor = function() {
+	return this.randomColor;
+};
+
 PhotoMask.prototype.getCanvases = function() {
 	this.$originCanvas = $(document.createElement('canvas'));
 	this.$compositeCanvas = $(document.createElement('canvas'));
@@ -143,7 +147,8 @@ PhotoMask.prototype.drawOriginalImageToCanvas = function() {
 
 		this.clearCanvas();
 
-		this.originctx.putImageData(imageDataGrayscale,x,y);
+		this.originctx.putImageData(imageDataGrayscale,x,y);		
+
 		this.originctx.globalCompositeOperation = "destination-over";
 
 		//set a background color to the canvas
@@ -153,7 +158,9 @@ PhotoMask.prototype.drawOriginalImageToCanvas = function() {
 
 		//get image data of the colorized image
 		this.filteredImageData = this.originctx.getImageData(0,0, w,h);
+		this.filteredImage = this.$originCanvas[0].toDataURL();
 
+		$(window).trigger('filteredImageCreated');
 		//create the svg canvas
 		this.createSvg();
 };
@@ -186,12 +193,11 @@ PhotoMask.prototype.createComposite = function() {
 
 	this.compositeData = this.$compositeCanvas[0].toDataURL();
 
-	$(window).trigger('compositeCreated');
-	
+	$(window).trigger('compositeCreated');	
 };
 
 PhotoMask.prototype.getData = function() {
-	return this.compositeData;
+	return this.filteredImage;
 };
 
 

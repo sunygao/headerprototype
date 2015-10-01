@@ -64,11 +64,11 @@ Displacement.prototype.onAssetsLoaded = function() {
 	this.photoContainer.alpha = 0;
 	this.videoContainer = new PIXI.Container();
 
-	this.container.alpha = 0;
+	//this.container.alpha = 0;
 
 	this.createBackground();
 	this.createBgFilters();
-	this.addPhoto();
+	//this.addPhoto();
 
 	this.stage.addChild(this.container);
 	this.stage.addChild(this.photoContainer);
@@ -157,11 +157,12 @@ Displacement.prototype.animate = function() {
 	this.videoSprite.height += 10;
 	if(this.hideVideo) {
 		this.videoContainer.alpha -= .5;
+		
 	}
 
-	if(this.videoContainer.alpha <= 0 && this.container.alpha <= 1) {
-		this.container.alpha += .05;
-	}
+	// if(this.videoContainer.alpha <= 0 && this.container.alpha <= 1) {
+	// 	this.container.alpha += .05;
+	// }
 
 	this.displacementFilter.scale.x = this.currentoffset;
 	this.displacementFilter.scale.y = this.currentoffset;

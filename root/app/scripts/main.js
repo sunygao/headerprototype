@@ -62,10 +62,10 @@ Main.prototype.onReady = function() {
 	this.createImage();
 	
 	var vector = new VectorTest();
-	vector.initialize();
+//	vector.initialize();
 
 	var image = new Displacement();
-	//image.initialize();
+	image.initialize();
 };
 
 Main.prototype.getCanvases = function() {
