@@ -20,7 +20,6 @@ var Displacement = function(){
 	this.maskedPhoto = null;
 	this.hideVideo = false;
 	this.photoShown = false;
-	
 
 	this.vertices = [];
 	this.vertices.push({
@@ -35,7 +34,6 @@ var Displacement = function(){
 	   	x: this.availW - 200,
 	    y: -20
 	});
-
 
 	this.curTime = 1;
 };
@@ -122,11 +120,11 @@ Displacement.prototype.createShape = function() {
   photo.position.x = this.availW*0.5;
   photo.position.y = (this.availH * .5) - (photo.height * .5) // - photo.height;
   //this.photoContainer.addChild(photo);
-	//this.photoContainer.filters = [this.colorFilter];
+	
 	this.shape = new PIXI.Graphics();
 	this.shapeOutline = new PIXI.Graphics();
 	 
-	this.shapeOutline.lineStyle(5, 0xff0000, 1);
+	this.shapeOutline.lineStyle(5, 0xffffff, 1);
 	this.shapeOutline.moveTo(200, -20);
 
 	this.shape.moveTo(200, -20);
@@ -140,6 +138,9 @@ Displacement.prototype.createShape = function() {
 	photo.mask = this.shape;
 	this.maskContainer.alpha = 0;
 	this.maskContainer.addChild(photo);
+	this.colorFilter = new PIXI.filters.ColorMatrixFilter();
+	var shadow = new PIXI.filters.DropShadowFilter();
+	this.maskContainer.filters = [this.colorFilter, shadow];
 	// add it the stage so we see it on our screens..
 	this.maskContainer.addChild(this.shape);
 	this.shapeContainer.addChild(this.shapeOutline);
@@ -195,7 +196,7 @@ Displacement.prototype.createBgFilters = function() {
   this.displacementSprite.scale.y = this.scaleLandscape(this.displacementSprite.width, this.displacementSprite.height).h;
   this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
   this.colorFilter = new PIXI.filters.ColorMatrixFilter();
-  this.colorFilter.desaturate(true);
+ // this.colorFilter.desaturate(true);
   
  	this.container.addChild(this.displacementSprite);
  	this.container.filters = [this.colorFilter, this.displacementFilter, this.blurFilter];
@@ -245,6 +246,7 @@ Displacement.prototype.animate = function(points) {
 	  this.shapeOutline.lineTo(points[this.curTime].x, points[this.curTime].y);
 	} else {
 		this.maskContainer.alpha = 1;
+		this.shapeOutline.alpha = 0;
 	}
 
   this.curTime++;
@@ -292,4 +294,13 @@ function calcWaypoints(vertices) {
     }
     return (waypoints);
 }
+
+function rgb2hex(rgb){
+ rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+ return (rgb && rgb.length === 4) ? "#" +
+  ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+  ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+}
+
 
