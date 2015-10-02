@@ -61,11 +61,17 @@ Main.prototype.onReady = function() {
 
 	this.createImage();
 	
-	var vector = new VectorTest();
-	//vector.initialize();
+	var vectorTest = new VectorTest();
+	//vectorTest.initialize();
 
-	var image = new Displacement();
-	image.initialize();
+	var vector = new Vector();
+	setTimeout(function() {
+		vector.initialize();
+	}, 1000);
+	
+
+	// var image = new Displacement();
+	// image.initialize();
 };
 
 Main.prototype.getCanvases = function() {

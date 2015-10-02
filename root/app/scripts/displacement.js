@@ -43,6 +43,8 @@ var Displacement = function(){
  * @public
  */
 Displacement.prototype.initialize = function() {
+	this.vector = new Vector();
+
 	var photoMask = new PhotoMask();
 	photoMask.createMaskedImage();
 
@@ -58,16 +60,8 @@ Displacement.prototype.initialize = function() {
 	var colorString = 'rgba(' + photoMask.getColor().color1[0] + ', ' + photoMask.getColor().color1[1] + ' , ' + photoMask.getColor().color1[2] + ', 1)'
 	this.color = rgb2hex(colorString);
 
-	$(window).one('lineDone', function() {
-		// this.maskContainer.alpha = 1;
-		// this.shapeOutline.alpha = 0;
-
-		TweenMax.to(_this.maskContainer, .5, {
-			alpha: 1
-		});
-		TweenMax.to(_this.shapeOutline, .5, {
-			alpha: 0
-		});
+	$(window).one('startVector', function() {
+		_this.vector.initialize();
 	});
 
 
@@ -109,10 +103,13 @@ Displacement.prototype.onAssetsLoaded = function() {
 	this.createShape();
 
 	this.stage.addChild(this.container);
+	
+	
 	//this.stage.addChild(this.photoContainer);
+
 	this.stage.addChild(this.videoContainer);
-	this.stage.addChild(this.shapeContainer);
-	this.stage.addChild(this.maskContainer);
+	// this.stage.addChild(this.shapeContainer);
+	// this.stage.addChild(this.maskContainer);
 	
   this.renderer.render(this.stage);
  
@@ -137,7 +134,6 @@ Displacement.prototype.createShape = function() {
 	
 	this.shape = new PIXI.Graphics();
 	this.shapeOutline = new PIXI.Graphics();
-	console.log(this.color);
 	this.shapeOutline.lineStyle(5, '0x' + this.color, 1);
 	this.shapeOutline.moveTo(200, -20);
 
@@ -187,6 +183,7 @@ Displacement.prototype.createBackground = function() {
 	});
 	this.video.addEventListener('timeupdate', function(e) {
 		if(_this.video.currentTime >= duration - 6) {
+			//$(window).trigger('startVector');
 			TweenMax.to(_this.videoContainer, 1, {
 				alpha: 0
 			});
@@ -239,13 +236,6 @@ Displacement.prototype.animate = function(points) {
 	this.videoSprite.width += 10;
 	this.videoSprite.height += 10;
 
-	if(this.hideVideo) {
-		this.videoContainer.alpha -= .5;
-	}
-
-	if(this.videoContainer.alpha <= 0 && this.container.alpha <= 1) {
-		//this.container.alpha += .05;
-	}
 	if(this.displacementSprite) {
 		this.displacementFilter.scale.x = this.currentoffset;
 		this.displacementFilter.scale.y = this.currentoffset;
