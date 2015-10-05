@@ -31,10 +31,19 @@
 
     </head>
   <body id="index">
+   
+
+    <div id="svg_defs">
+       <svg>
+          <!-- <polygon id="triangles" points="0,108.2 68.7,30.7 49.9,88.3 155.3,0 124.3,67.3 147.9,52.8 125.8,108.2 "/> -->
+        </svg>
+     </div>
 
     <div id="header3" class="header">
-        
+      
     </div>
+
+
      <div id="header2" class="header">
         <canvas id="vector_canvas"></canvas>
     </div>
@@ -46,8 +55,8 @@
         <canvas id="background_canvas"></canvas>
     </div>
 
-    <div id="svg_container">
-        <svg version="1.1" id="triangles" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+   <!--  <div id="svg_container">
+        <svg version="1.1" id="triangles" width="800" height="600" viewbox="0 0 800 600"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
      viewBox="0 0 155.3 108.2" style="enable-background:new 0 0 155.3 108.2;" xml:space="preserve">
           <polygon class="shape1" points="0,108.1 68.7,30.6 43.3,108.1 "/>
 					<polygon class="shape2" points="26.3,108.1 155,0 105.6,108.1 "/>
@@ -56,34 +65,31 @@
 					<clipPath id="clip">
           	<polygon class="st0" points="0,108.2 68.7,30.7 49.9,88.3 155.3,0 124.3,67.3 147.9,52.8 125.8,108.2 "/>
          	</clipPath>
-          <image clip-path="url(#clip)" width="640" height="275" xlink:href="static/img/hands.jpg" ></image>
+          <image clip-path="url(#clip)"  xlink:href="static/img/hands.jpg" ></image>
   				<use xlink:href="#clip"/>
         </svg>
-
-      <!--   <svg version="1.1" id="triangle_clip" viewbox="0 0 800 600" width="800" height="600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-     viewBox="0 0 155.3 108.2" style="enable-background:new 0 0 155.3 108.2;" xml:space="preserve">
-   
-       		<clipPath id="clip">
-          	<polygon class="st0" points="0,108.2 68.7,30.7 49.9,88.3 155.3,0 124.3,67.3 147.9,52.8 125.8,108.2 "/>
-         	</clipPath>
-        </svg>
-  	
- -->
-<!--   		<img src="static/img/hands.jpg" />
- -->
-
-        
-
-    </div>
+    </div> -->
    
 
         <!-- <a href="#" id="login">Login</a> -->
     </div>
+
+    <script id="shape-template" type="text/x-handlebars-template">
+       <article>
+        <svg id="{{id}}" class="shape" preserveAspectRatio="xMidYMid meet" viewBox="{{viewBox}}"> <!-- set to size of svg -->
+          <use xlink:href="#{{defId}}"/>
+            <clipPath id="clip">
+              <use xlink:href="#{{defId}}"/>
+            </clipPath>
+        <image clip-path="url(#clip)" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" xlink:href="{{imgUrl}}" ></image> 
+        </svg>
+      </article>
+    </script>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script> 
     <script src="scripts/pixi.js"></script> 
     <script src="scripts/paper-full.js"></script> 
-    <script src="scripts/paper-full.js"></script> 
+    <script src="scripts/handlebars-v4.0.2.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js"></script>
     <script src="scripts/config.js"></script> 
     <script src="scripts/main.js"></script> 

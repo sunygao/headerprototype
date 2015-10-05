@@ -6,23 +6,55 @@
  */
 
 var Vector = function(){
-	this.$el = $('#svg_container');
-	this.$triangles = $('#triangles');
-	this.trianglesWidth = this.$triangles.width();
+	this.$el = $('#header3');
+	this.shapeUrl = 'static/svg/triangle.svg';
+	this.$defs = $('#svg_defs svg');
+	this.shapeId = 'triangles';
+	this.numShapes = 1;
+	this.template = $('#shape-template').html(); 
+	this.imgUrl = 'static/img/hands.jpg'
+
+	this.getShape();
+
 	this.strokeDashArray = this.trianglesWidth;
 	this.strokeOffset = this.trianglesWidth;
-	this.scale = 3;
 };
+
+Vector.prototype.getShape = function() {
+
+	var _this = this;
+	$.get(this.shapeUrl, function(data) {
+  	_this.$shape = $(data).find('polygon').attr('id', _this.shapeId);
+  	_this.$shape.appendTo(_this.$defs);
+  	_this.shapeWidth = _this.$shape[0].getBBox().width;
+  	_this.shapeHeight = _this.$shape[0].getBBox().height;
+  	_this.createShape();
+	});
+};
+
+Vector.prototype.createShape = function() {
+	var context = {
+		id: this.shapeId + 1,
+		viewBox: '0 0 ' + this.shapeWidth + ' ' + this.shapeHeight,
+		defId: this.shapeId,
+		imgUrl : this.imgUrl
+	}
+	var template = Handlebars.compile(this.template);
+	var html = template(context);
+	$(html).appendTo(this.$el);
+
+	this.strokeDashArray = $('#' + context.id).width();
+	this.strokeOffset = $('#' + context.id).width();
+
+	this.initialize();
+};
+
+
 
 Vector.prototype.initialize = function() {
 	var bBox = this.$triangles[0].getBBox();
 	var width = bBox.width;
 	var height = bBox.height;
-	var points = this.$triangles.find('polygon').attr('points');
-	console.log($('test').split);
-	// $.each(points, function(i, point) {
-	// 	console.log(point);
-	// });
 
 	this.$triangles.css({ 
 		'stroke-dasharray' : this.strokeDashArray,

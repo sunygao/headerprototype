@@ -65,9 +65,9 @@ Main.prototype.onReady = function() {
 	//vectorTest.initialize();
 
 	var vector = new Vector();
-	setTimeout(function() {
-		vector.initialize();
-	}, 1000);
+	// setTimeout(function() {
+	// 	vector.initialize();
+	// }, 1000);
 	
 
 	// var image = new Displacement();

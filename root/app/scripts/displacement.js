@@ -61,7 +61,7 @@ Displacement.prototype.initialize = function() {
 	this.color = rgb2hex(colorString);
 
 	$(window).one('startVector', function() {
-		_this.vector.initialize();
+		//_this.vector.initialize();
 	});
 
 
