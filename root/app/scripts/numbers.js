@@ -26,6 +26,7 @@ var Numbers = function() {
 
 	this.colors = [];
 	this.colorData = null;
+	this.textWidth = 0;
 
 	this.toggleColors();
 
@@ -112,14 +113,14 @@ Numbers.prototype.drawPreview = function() {
 	this.$image.css({
 		'background-image': 'url(' + this.colorData + ')',
 		'width': this.textWidth,
-		'margin-left' : -(this.textWidth/2)
+		//'margin-left' : -(this.textWidth/2)
 	});
 };
 
 Numbers.prototype.writeText = function() {
 	var font = this.fontSize + ' ' + this.fontFamily;
 	var message = this.num;
-	var w, x, y;
+	var w, x = 0, y;
 	var dashLen = 220, dashOffset = dashLen, speed = 10,
 	txt = message, i = 0;
 	
@@ -133,28 +134,38 @@ Numbers.prototype.writeText = function() {
 	this.ctx.textAlign = 'left';
 	this.ctx.textBaseline = 'top'; // important!
 	this.ctx.font = font;
-	w = this.ctx.measureText(message).width;
-	x = (this.availW/2) - (w/2);
-	this.ctx.fillText(message, x, 0);
-	this.textWidth = w;
+	//w = this.ctx.measureText(message).width;
+	//x = (this.availW/2) - (w/2);
 
 
-	// var _this = this;
+	for (var i = 0; i < this.num.length; i++) {
+    	var character = this.num.charAt(i);
+    	var w = this.ctx.measureText(this.num.charAt(i)).width;
+    	this.ctx.fillText(character, x, 0);
+    	x = x + w;
+    	this.textWidth += w;
+	}
+
+	//this.ctx.fillText(message, x, 0);
+	
+
+
+	var _this = this;
 
 	// (function loop() {
  //  		_this.ctx.clearRect(x, 0, 60, 150);
  //  		_this.ctx.setLineDash([dashLen - dashOffset, dashOffset - speed]); // create a long dash mask
  //  		dashOffset -= speed;                                         // reduce dash length
- //  		_this.ctx.strokeText(txt[i], x, 90);                               // stroke letter
-
+ //  		_this.ctx.strokeText(txt[i], x, 0);                               // stroke letter
+ //  		console.log(dashOffset);
  //  		if (dashOffset > 0) {
  //  			requestAnimationFrame(loop); 
  //  		} else {
- //    		_this.ctx.fillText(txt[i], x, 90);                               // fill final letter
+ //    		// _this.ctx.fillText(txt[i], x, 90);                               // fill final letter
  //    		dashOffset = dashLen;                                      // prep next char
  //    		x += _this.ctx.measureText(txt[i++]).width +_this.ctx.lineWidth * Math.random();
- //    		_this.ctx.setTransform(1, 0, 0, 1, 0, 3 * Math.random());        // random y-delta
- //    		_this.ctx.rotate(Math.random() * 0.005);                         // random rotation
+ //    		//_this.ctx.setTransform(1, 0, 0, 1, 0, 3 * Math.random());        // random y-delta
+ //    		//_this.ctx.rotate(Math.random() * 0.005);                         // random rotation
  //    		if (i < txt.length)  {
  //    			requestAnimationFrame(loop);
  //    		}
