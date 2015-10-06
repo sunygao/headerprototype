@@ -52,7 +52,6 @@ Numbers.prototype.setUpBinds = function() {
 		var scrollTop = $(window).scrollTop();
 		TweenMax.set(_this.$image, {
 			backgroundPosition: -(.5 * scrollTop) + 'px ' + -(.5 * scrollTop) + 'px'
-		//	y: -(.5 * scrollTop)
 		});
 	});
 
@@ -121,6 +120,14 @@ Numbers.prototype.writeText = function() {
 	var font = this.fontSize + ' ' + this.fontFamily;
 	var message = this.num;
 	var w, x, y;
+	var dashLen = 220, dashOffset = dashLen, speed = 10,
+	txt = message, i = 0;
+	
+	this.ctx.rect(0, 0, this.availW, this.availH);
+	this.ctx.fillStyle = this.bgColor;
+	this.ctx.fill();
+
+	this.ctx.globalCompositeOperation = 'xor';
 
 	this.ctx.fillStyle = 'black';
 	this.ctx.textAlign = 'left';
@@ -131,11 +138,29 @@ Numbers.prototype.writeText = function() {
 	this.ctx.fillText(message, x, 0);
 	this.textWidth = w;
 
-	this.ctx.globalCompositeOperation = 'xor';
 
-	this.ctx.rect(0, 0, this.availW, this.availH);
-	this.ctx.fillStyle = this.bgColor;
-	this.ctx.fill();
+	// var _this = this;
+
+	// (function loop() {
+ //  		_this.ctx.clearRect(x, 0, 60, 150);
+ //  		_this.ctx.setLineDash([dashLen - dashOffset, dashOffset - speed]); // create a long dash mask
+ //  		dashOffset -= speed;                                         // reduce dash length
+ //  		_this.ctx.strokeText(txt[i], x, 90);                               // stroke letter
+
+ //  		if (dashOffset > 0) {
+ //  			requestAnimationFrame(loop); 
+ //  		} else {
+ //    		_this.ctx.fillText(txt[i], x, 90);                               // fill final letter
+ //    		dashOffset = dashLen;                                      // prep next char
+ //    		x += _this.ctx.measureText(txt[i++]).width +_this.ctx.lineWidth * Math.random();
+ //    		_this.ctx.setTransform(1, 0, 0, 1, 0, 3 * Math.random());        // random y-delta
+ //    		_this.ctx.rotate(Math.random() * 0.005);                         // random rotation
+ //    		if (i < txt.length)  {
+ //    			requestAnimationFrame(loop);
+ //    		}
+ //  		}
+  
+	// })();
 };
 
 Numbers.prototype.getTextHeight = function() {
