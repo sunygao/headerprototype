@@ -16,6 +16,10 @@ html {
 #numbers {
 	min-height: 2000px;
 	
+	#bg_preview {
+		position: fixed;
+	}
+	
 	#text_container {
 		.num {
 			display: none;
@@ -27,7 +31,9 @@ html {
 			margin-top: 50px;
 			width: 700px;
 			height: 500px;
-			position: relative;
+			position: fixed;
+			right: 0;
+			top: 50px;
 			overflow: hidden;
 				
 			canvas {
@@ -36,13 +42,12 @@ html {
 			}
 			
 			#image {
-				background: url('../static/img/test_header.jpg') center top repeat;
+				background: url('../static/img/test_header.jpg') 0 0 repeat;
 				background-size: 100% 100%;
 				width: 100%;
 				height: 150%;
 				position: absolute;
 				left: 50%;
-				transform: translateX(-50%);
 				top: 0;
 			}
 		}

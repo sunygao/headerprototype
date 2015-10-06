@@ -29,9 +29,6 @@ var Numbers = function() {
 
 	this.toggleColors();
 
-	
-
-	
 
 	this.init();	
 };
@@ -54,7 +51,8 @@ Numbers.prototype.setUpBinds = function() {
 	$(window).on('scroll', function(e) {
 		var scrollTop = $(window).scrollTop();
 		TweenMax.set(_this.$image, {
-			y: -(.7 * scrollTop)
+			backgroundPosition: -(.5 * scrollTop) + 'px ' + -(.5 * scrollTop) + 'px'
+		//	y: -(.5 * scrollTop)
 		});
 	});
 
@@ -83,21 +81,29 @@ Numbers.prototype.toggleColors = function() {
 };
 
 Numbers.prototype.drawPreview = function() {
+	this.previewCtx.clearRect(0,0,this.availW, this.previewH);
+
 	var _this = this;
 	
 	$.each(this.colors, function(i, color) {
+		var offset = 50;
 		var color = '#' + $(color).data('color');
-		var w = (_this.availW/_this.colors.length) + (_this.availW/_this.colors.length) * .5;
+		var w = _this.availW/_this.colors.length;
 		var x = w * i;
 		var h = _this.previewH;
 		var y = 0;
+
 		_this.previewCtx.save();
 		_this.previewCtx.beginPath();
 		_this.previewCtx.translate(0, 0);
 		_this.previewCtx.moveTo(x, 0);
-		_this.previewCtx.lineTo(w + x, 0);
-		_this.previewCtx.lineTo(x, _this.previewH);
-		_this.previewCtx.lineTo(x-w, _this.previewH);
+
+		_this.previewCtx.lineTo(w + x + offset, 0);
+
+		_this.previewCtx.lineTo(w + x, _this.previewH);
+
+		_this.previewCtx.lineTo(x - offset, _this.previewH);
+
 		_this.previewCtx.closePath();
 		_this.previewCtx.fillStyle = color;
 		_this.previewCtx.fill();
@@ -106,7 +112,8 @@ Numbers.prototype.drawPreview = function() {
 	this.colorData = this.$previewCanvas[0].toDataURL();
 	this.$image.css({
 		'background-image': 'url(' + this.colorData + ')',
-		'width': this.textWidth
+		'width': this.textWidth,
+		'margin-left' : -(this.textWidth/2)
 	});
 };
 
