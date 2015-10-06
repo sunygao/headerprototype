@@ -6,6 +6,7 @@
  */
 
 var Vector = function(){
+	console.log('here');
 	this.$el = $('#header3');
 	this.shapeUrl = 'static/svg/triangle.svg';
 	this.$defs = $('#svg_defs svg');
@@ -43,6 +44,7 @@ Vector.prototype.createShape = function() {
 	var html = template(context);
 	$(html).appendTo(this.$el);
 
+	this.$newShape = $('#' + this.shapeId + 1);
 	this.strokeDashArray = $('#' + context.id).width();
 	this.strokeOffset = $('#' + context.id).width();
 
@@ -52,11 +54,10 @@ Vector.prototype.createShape = function() {
 
 
 Vector.prototype.initialize = function() {
-	var bBox = this.$triangles[0].getBBox();
-	var width = bBox.width;
-	var height = bBox.height;
 
-	this.$triangles.css({ 
+	console.log(this.$newShape);
+
+	this.$newShape.css({ 
 		'stroke-dasharray' : this.strokeDashArray,
 		'stroke-dashoffset' : this.strokeOffset,
 		'opacity' : 1
@@ -65,14 +66,14 @@ Vector.prototype.initialize = function() {
 	TweenMax.to(this, 1, {
 		strokeOffset: 0,
 		onUpdate: function() {
-			this.$triangles.css({ 
+			this.$newShape.css({ 
 				'stroke-dasharray' : this.strokeDashArray,
 				'stroke-dashoffset' : this.strokeOffset
 			});
 		},
 		onUpdateScope: this,
 		onComplete: function() {
-			this.$triangles.attr('class', 'active')
+			this.$newShape.attr('class', 'active')
 		},
 		onCompleteScope: this
 	});

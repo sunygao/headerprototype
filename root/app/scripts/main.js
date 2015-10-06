@@ -55,23 +55,27 @@ var Main = function(){
  * @public
  */
 Main.prototype.onReady = function() {
-	this.getCanvases();
+	if($('body').attr('id') == 'numbers') {
+		var numbers = new Numbers();
+		
+	} else {
+		// this.getCanvases();
 
-	this.getRandomItems();
+		// this.getRandomItems();
 
-	this.createImage();
-	
-	var vectorTest = new VectorTest();
-	//vectorTest.initialize();
+		// this.createImage();
+		
+		var vectorTest = new VectorTest();
+		//vectorTest.initialize();
 
-	var vector = new Vector();
-	// setTimeout(function() {
-	// 	vector.initialize();
-	// }, 1000);
-	
+		//var vector = new Vector();
+		// setTimeout(function() {
+		// 	vector.initialize();
+		// }, 1000);
 
-	// var image = new Displacement();
-	// image.initialize();
+		var image = new Displacement();
+	 	image.initialize();
+	}
 };
 
 Main.prototype.getCanvases = function() {

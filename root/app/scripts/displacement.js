@@ -43,12 +43,13 @@ var Displacement = function(){
  * @public
  */
 Displacement.prototype.initialize = function() {
-	this.vector = new Vector();
+	
 
 	var photoMask = new PhotoMask();
 	photoMask.createMaskedImage();
 
 	var _this = this;
+	this.vector = new Vector();
 
 	$(window).bind('compositeCreated', function() {
 		_this.maskedPhoto = photoMask.getData();
@@ -61,7 +62,7 @@ Displacement.prototype.initialize = function() {
 	this.color = rgb2hex(colorString);
 
 	$(window).one('startVector', function() {
-		//_this.vector.initialize();
+		this.vector = new Vector();
 	});
 
 
