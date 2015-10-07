@@ -54,16 +54,39 @@ Numbers.prototype.init = function() {
 
 	this.container = new PIXI.Container();
 
+
+	//create a white bg
 	var whiteBg = new PIXI.Graphics();
-
 	whiteBg.beginFill(0xFFFFFF);
-
 	whiteBg.drawRect(0, 0, this.availW, this.availH);
 
-	var colorBgBase = PIXI.BaseTexture.fromCanvas(document.getElementById('bg'), 1);
-	console.log(colorBg);
+	//create a red bg
+	var redBg = new PIXI.Graphics();
+	redBg.beginFill(0xff0000);
+	redBg.drawRect(0, 0, this.availW, this.availH);
+
+	var mask = new PIXI.Text(this.num, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
+	mask.anchor.set(0.5);
+	mask.position.x = 310;
+	mask.position.y = 190;
+
+	var mask2 = new PIXI.Text('test', { font: this.fontSize + ' ' + this.fontFamily, fill: 'yellow', align: 'top' });
+	mask.anchor.set(0.5);
+	mask.position.x = 310;
+	mask.position.y = 200;
+
+
+
+	redBg.mask = mask;
+	//redBg.mask = mask2;
+	
 	this.stage.addChild(whiteBg);
-	this.stage.addChild(colorBg);
+	this.stage.addChild(mask);
+	this.stage.addChild(mask2);
+	this.stage.addChild(redBg);
+	
+	//this.stage.addChild(mask2);
+	
 
 	this.renderer.render(this.stage);
 
