@@ -10,7 +10,7 @@ var Numbers = function() {
 	this.availW = this.$el.width();
 	this.availH = this.$el.height();
 	this.previewH = this.availH;
-
+	this.shapeUrl = 'static/svg/triangle.svg';
 
 	this.num = $('#text_container .num').text();
 
@@ -37,16 +37,68 @@ var Numbers = function() {
 
 Numbers.prototype.init = function() {
 	// this.$canvas.attr('height', this.availH).attr('width', this.availW);
-	// this.$previewCanvas.attr('height', this.previewH).attr('width', this.availW);
+	this.$previewCanvas.attr('height', this.previewH).attr('width', this.availW);
 	
-	// this.writeText();
+	this.svg = new Image();
+	this.svg.src = this.shapeUrl;
+	
+	var _this = this;
 
-	this.drawPreview();
+	this.svg.onload = function() {
+		_this.svgWidth = _this.svg.width;
+		_this.svgHeight = _this.svg.height;
 
-	console.log(this.colorData);
+		var x, y, w, h, ratio;
 
-	// this.setUpBinds();	
+		w = _this.availW;
+		h = _this.svg.height * w / _this.svg.width;
+		x = 0;
+		y = 0;
+		
+		_this.svgWidth = w;
+		_this.svgHeight = h;
 
+		var canvas = document.createElement('canvas');
+		$(canvas).attr('height', h).attr('width', w);
+		var ctx = canvas.getContext('2d');
+		ctx.drawImage(_this.svg, x, y, w, h);
+
+		var imageData = ctx.getImageData(x,y,w,h); 
+  	var pixels = imageData.data;
+  	var numPixels = pixels.length;
+  	for (var i = 0; i < numPixels; i+= 4) {
+			var average = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+		
+			if(pixels[i] == 0 && pixels[i + 1] == 0 && pixels[i+3] == 0) {
+				//console.log('here');
+	    	pixels[i+3] = 0;
+
+			} else {
+				pixels[i] = 254;
+	    	pixels[i+1] = 91;
+	    	pixels[i+2] = 10;
+			}
+			
+		}
+
+		ctx.clearRect(0,0,w, h);
+
+		ctx.putImageData(imageData, 0,0);
+		_this.svgData = ctx.getImageData(0,0,w,h);
+
+
+		_this.drawPreview();
+
+		//_this.writeText();
+		_this.initPixi();
+
+		_this.setUpBinds();
+	
+	}
+
+};
+
+Numbers.prototype.initPixi = function() {
 	this.renderer = PIXI.autoDetectRenderer(this.availW, this.availH, { transparent: true });
 	this.$el[0].appendChild(this.renderer.view);
 
@@ -60,35 +112,25 @@ Numbers.prototype.init = function() {
 	whiteBg.beginFill(0xFFFFFF);
 	whiteBg.drawRect(0, 0, this.availW, this.availH);
 
-	//create a red bg
-	var redBg = new PIXI.Graphics();
-	redBg.beginFill(0xff0000);
-	redBg.drawRect(0, 0, this.availW, this.availH);
-
-	var mask = new PIXI.Text(this.num, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
-	mask.anchor.set(0.5);
-	mask.position.x = 310;
-	mask.position.y = 190;
-
-	var mask2 = new PIXI.Text('test', { font: this.fontSize + ' ' + this.fontFamily, fill: 'yellow', align: 'top' });
-	mask.anchor.set(0.5);
-	mask.position.x = 310;
-	mask.position.y = 200;
-
-
-
-	redBg.mask = mask;
-	//redBg.mask = mask2;
+	var loader = new PIXI.loaders.Loader();
+	var _this = this;
+	loader.add(this.colorData);
+	loader.load(function(item) {
+		var bg = new PIXI.Sprite.fromImage(_this.colorData);
+		//bg.anchor.set(0.5);
+		bg.position.x = 0;
+		bg.position.y = 0;
+		
+		var mask = new PIXI.Text(_this.num, { font: _this.fontSize + ' ' + _this.fontFamily, fill: 'red', align: 'top' });
+		bg.mask = mask;
+		_this.stage.addChild(whiteBg);
+		_this.stage.addChild(mask);
+		_this.stage.addChild(bg);
+		
+    _this.renderer.render(_this.stage);
+  });
 	
-	this.stage.addChild(whiteBg);
-	this.stage.addChild(mask);
-	this.stage.addChild(mask2);
-	this.stage.addChild(redBg);
 	
-	//this.stage.addChild(mask2);
-	
-
-	this.renderer.render(this.stage);
 
 };
 
@@ -130,7 +172,11 @@ Numbers.prototype.drawPreview = function() {
 	this.previewCtx.clearRect(0,0,this.availW, this.previewH);
 
 	var _this = this;
-	
+
+	this.drawShape();
+
+	this.previewCtx.globalCompositeOperation = 'destination-over';
+
 	$.each(this.colors, function(i, color) {
 		var offset = 50;
 		var color = '#' + $(color).data('color');
@@ -155,12 +201,19 @@ Numbers.prototype.drawPreview = function() {
 		_this.previewCtx.fill();
 		_this.previewCtx.restore();
 	});
+
+
 	this.colorData = this.$previewCanvas[0].toDataURL();
 	this.$image.css({
-		'background-image': 'url(' + this.colorData + ')',
-		'width': this.textWidth,
+		//'background-image': 'url(' + this.colorData + ')',
+		//'width': this.textWidth,
 		//'margin-left' : -(this.textWidth/2)
 	});
+};
+
+Numbers.prototype.drawShape = function() {
+	this.previewCtx.putImageData(this.svgData, 0, 0);
+
 };
 
 Numbers.prototype.writeText = function() {
