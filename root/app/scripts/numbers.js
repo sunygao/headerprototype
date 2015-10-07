@@ -14,8 +14,8 @@ var Numbers = function() {
 
 	this.num = $('#text_container .num').text();
 
-	this.$canvas = $('#numbers_canvas');
-	this.ctx = this.$canvas[0].getContext('2d');
+	// this.$canvas = $('#numbers_canvas');
+	// this.ctx = this.$canvas[0].getContext('2d');
 	this.$previewCanvas = $('#bg');
 	this.previewCtx = this.$previewCanvas[0].getContext('2d');
 	this.$image = $('#image');
@@ -36,14 +36,37 @@ var Numbers = function() {
 
 
 Numbers.prototype.init = function() {
-	this.$canvas.attr('height', this.availH).attr('width', this.availW);
-	this.$previewCanvas.attr('height', this.previewH).attr('width', this.availW);
+	// this.$canvas.attr('height', this.availH).attr('width', this.availW);
+	// this.$previewCanvas.attr('height', this.previewH).attr('width', this.availW);
 	
-	this.writeText();
+	// this.writeText();
 
 	this.drawPreview();
 
-	this.setUpBinds();	
+	console.log(this.colorData);
+
+	// this.setUpBinds();	
+
+	this.renderer = PIXI.autoDetectRenderer(this.availW, this.availH, { transparent: true });
+	this.$el[0].appendChild(this.renderer.view);
+
+	this.stage = new PIXI.Container();
+
+	this.container = new PIXI.Container();
+
+	var whiteBg = new PIXI.Graphics();
+
+	whiteBg.beginFill(0xFFFFFF);
+
+	whiteBg.drawRect(0, 0, this.availW, this.availH);
+
+	var colorBgBase = PIXI.BaseTexture.fromCanvas(document.getElementById('bg'), 1);
+	console.log(colorBg);
+	this.stage.addChild(whiteBg);
+	this.stage.addChild(colorBg);
+
+	this.renderer.render(this.stage);
+
 };
 
 Numbers.prototype.setUpBinds = function() {
@@ -134,9 +157,6 @@ Numbers.prototype.writeText = function() {
 	this.ctx.textAlign = 'left';
 	this.ctx.textBaseline = 'top'; // important!
 	this.ctx.font = font;
-	//w = this.ctx.measureText(message).width;
-	//x = (this.availW/2) - (w/2);
-
 
 	for (var i = 0; i < this.num.length; i++) {
     	var character = this.num.charAt(i);
@@ -146,7 +166,6 @@ Numbers.prototype.writeText = function() {
     	this.textWidth += w;
 	}
 
-	//this.ctx.fillText(message, x, 0);
 	
 
 
