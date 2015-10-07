@@ -10,7 +10,7 @@ var Numbers = function() {
 	this.availW = this.$el.width();
 	this.availH = this.$el.height();
 	this.previewH = this.availH;
-
+	this.shapeUrl = 'static/svg/triangle.svg';
 
 	this.num = $('#text_container .num').text();
 
@@ -38,12 +38,23 @@ var Numbers = function() {
 Numbers.prototype.init = function() {
 	this.$canvas.attr('height', this.availH).attr('width', this.availW);
 	this.$previewCanvas.attr('height', this.previewH).attr('width', this.availW);
+
+	var _this = this;
+	$.get(this.shapeUrl, function(data) {
+  	_this.$shape = $(data).find('polygon');
+  	_this.path = _this.$shape.attr('points');
+  	_this.shapeWidth = _this.$shape[0].getBBox().width;
+  	_this.shapeHeight = _this.$shape[0].getBBox().height;
+  	//_this.createShape();
+
+  	_this.writeText();
+
+		_this.drawPreview();
+
+		_this.setUpBinds();
+	});
 	
-	this.writeText();
-
-	this.drawPreview();
-
-	this.setUpBinds();	
+		
 };
 
 Numbers.prototype.setUpBinds = function() {
@@ -109,12 +120,19 @@ Numbers.prototype.drawPreview = function() {
 		_this.previewCtx.fill();
 		_this.previewCtx.restore();
 	});
+
+	this.drawShape();
+
 	this.colorData = this.$previewCanvas[0].toDataURL();
 	this.$image.css({
 		'background-image': 'url(' + this.colorData + ')',
 		'width': this.textWidth,
 		//'margin-left' : -(this.textWidth/2)
 	});
+};
+
+Numbers.prototype.drawShape = function() {
+	console.log('here');
 };
 
 Numbers.prototype.writeText = function() {
