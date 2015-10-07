@@ -43,53 +43,78 @@ Numbers.prototype.init = function() {
 
 	this.drawPreview();
 
-	console.log(this.colorData);
+	var scene = new THREE.Scene();
+	var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-	// this.setUpBinds();	
+	var renderer = new THREE.WebGLRenderer();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
 
-	this.renderer = PIXI.autoDetectRenderer(this.availW, this.availH, { transparent: true });
-	this.$el[0].appendChild(this.renderer.view);
+	var light = new THREE.DirectionalLight( 0xffffff );
+  light.position.set( 0, 1, 1 ).normalize();
+  scene.add(light);
 
-	this.stage = new PIXI.Container();
+	var material = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('static/img/test_header.jpg') } );
+ 	var textGeom = new THREE.TextGeometry('16,800', {
+    font: 'born', // Must be lowercase!
+    size: 50,
+   // bevelEnabled: false,
+    //height: 1
+      
+  });
 
-	this.container = new PIXI.Container();
+  var textMesh = new THREE.Mesh( textGeom, material );
+
+  scene.add( textMesh );
+
+  var geometry = new THREE.CubeGeometry( 20, 20, 20);
+ 	var material2 = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('static/img/texture-atlas.jpg') } );
+
+	var bricks = [new THREE.Vector2(0, .666), new THREE.Vector2(.5, .666), new THREE.Vector2(.5, 1), new THREE.Vector2(0, 1)];
+	var clouds = [new THREE.Vector2(.5, .666), new THREE.Vector2(1, .666), new THREE.Vector2(1, 1), new THREE.Vector2(.5, 1)];
+	var crate = [new THREE.Vector2(0, .333), new THREE.Vector2(.5, .333), new THREE.Vector2(.5, .666), new THREE.Vector2(0, .666)];
+	var stone = [new THREE.Vector2(.5, .333), new THREE.Vector2(1, .333), new THREE.Vector2(1, .666), new THREE.Vector2(.5, .666)];
+	var water = [new THREE.Vector2(0, 0), new THREE.Vector2(.5, 0), new THREE.Vector2(.5, .333), new THREE.Vector2(0, .333)];
+	var wood = [new THREE.Vector2(.5, 0), new THREE.Vector2(1, 0), new THREE.Vector2(1, .333), new THREE.Vector2(.5, .333)];  
+
+	geometry.faceVertexUvs[0] = [];
+
+	geometry.faceVertexUvs[0][0] = [ bricks[0], bricks[1], bricks[3] ];
+	geometry.faceVertexUvs[0][1] = [ bricks[1], bricks[2], bricks[3] ];
+	  
+	geometry.faceVertexUvs[0][2] = [ clouds[0], clouds[1], clouds[3] ];
+	geometry.faceVertexUvs[0][3] = [ clouds[1], clouds[2], clouds[3] ];
+	  
+	geometry.faceVertexUvs[0][4] = [ crate[0], crate[1], crate[3] ];
+	geometry.faceVertexUvs[0][5] = [ crate[1], crate[2], crate[3] ];
+	  
+	geometry.faceVertexUvs[0][6] = [ stone[0], stone[1], stone[3] ];
+	geometry.faceVertexUvs[0][7] = [ stone[1], stone[2], stone[3] ];
+	  
+	geometry.faceVertexUvs[0][8] = [ water[0], water[1], water[3] ];
+	geometry.faceVertexUvs[0][9] = [ water[1], water[2], water[3] ];
+	  
+	geometry.faceVertexUvs[0][10] = [ wood[0], wood[1], wood[3] ];
+	geometry.faceVertexUvs[0][11] = [ wood[1], wood[2], wood[3] ];
+
+	var mesh = new THREE.Mesh(geometry,  material2);
+
+  scene.add( mesh );
+
+	camera.position.z = 200;
+	camera.position.x = 60;
 
 
-	//create a white bg
-	var whiteBg = new PIXI.Graphics();
-	whiteBg.beginFill(0xFFFFFF);
-	whiteBg.drawRect(0, 0, this.availW, this.availH);
+	function render() {
+		requestAnimationFrame( render );
+		renderer.render( scene, camera );
+	 mesh.rotation.x += .05;
+	 mesh.rotation.y += .05;
+	 //textMesh.rotation.x += .05;
+	 //textMesh.rotation.y += .05;
 
-	//create a red bg
-	var redBg = new PIXI.Graphics();
-	redBg.beginFill(0xff0000);
-	redBg.drawRect(0, 0, this.availW, this.availH);
-
-	var mask = new PIXI.Text(this.num, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
-	mask.anchor.set(0.5);
-	mask.position.x = 310;
-	mask.position.y = 190;
-
-	var mask2 = new PIXI.Text('test', { font: this.fontSize + ' ' + this.fontFamily, fill: 'yellow', align: 'top' });
-	mask.anchor.set(0.5);
-	mask.position.x = 310;
-	mask.position.y = 200;
-
-
-
-	redBg.mask = mask;
-	//redBg.mask = mask2;
-	
-	this.stage.addChild(whiteBg);
-	this.stage.addChild(mask);
-	this.stage.addChild(mask2);
-	this.stage.addChild(redBg);
-	
-	//this.stage.addChild(mask2);
-	
-
-	this.renderer.render(this.stage);
-
+	}
+	render();
 };
 
 Numbers.prototype.setUpBinds = function() {
