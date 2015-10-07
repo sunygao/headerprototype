@@ -56,8 +56,8 @@ var Main = function(){
  */
 Main.prototype.onReady = function() {
 	if($('body').attr('id') == 'numbers') {
-		var numbers = new Numbers();
-		
+		var numbers = new NumbersShader();
+
 	} else {
 		// this.getCanvases();
 

@@ -32,7 +32,7 @@
     </head>
   <body id="numbers">
     <div id="bg_preview">
-      <ul id="colors">
+     <!--  <ul id="colors">
         <li class="d4faef" data-color="d4faef" data-active="true">
           <div class="swatch"></div>
           <a href="#">on/off</a>        
@@ -50,7 +50,7 @@
            <div class="swatch"></div>
           <a href="#">on/off</a>
         </li>
-      </ul>
+      </ul> -->
       <canvas id="bg"></canvas>
     </div>
    
@@ -58,7 +58,7 @@
       <div class="num">16,800</div>
       <div id="numbers_container">
         <canvas id="numbers_canvas"></canvas>
-        <div id="image"></div>
+        <!-- <div id="image"></div> -->
       </div>
     </div>
     
@@ -67,6 +67,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js"></script>
     <script src="scripts/config.js"></script> 
     <script src="scripts/main.js"></script> 
-    <script src="scripts/numbers.js"></script> 
+    <script src="scripts/numbersShader.js"></script> 
+
+    <script id="2d-vertex-shader" type="x-shader/x-vertex">
+      attribute vec2 a_position;
+ 
+      uniform vec2 u_resolution;
+       
+      void main() {
+         // convert the rectangle from pixels to 0.0 to 1.0
+         vec2 zeroToOne = a_position / u_resolution;
+       
+         // convert from 0->1 to 0->2
+         vec2 zeroToTwo = zeroToOne * 2.0;
+       
+         // convert from 0->2 to -1->+1 (clipspace)
+         vec2 clipSpace = zeroToTwo - 1.0;
+       
+         gl_Position = vec4(clipSpace, 0, 1);
+      }
+    </script>
+     
+    <script id="2d-fragment-shader" type="x-shader/x-fragment">
+    void main() {
+      gl_FragColor = vec4(0, 1, 0, 1);  // green
+    }
+    </script>
   </body>
 </html>
