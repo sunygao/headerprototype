@@ -40,20 +40,62 @@ Numbers.prototype.init = function() {
 	this.$previewCanvas.attr('height', this.previewH).attr('width', this.availW);
 
 	var _this = this;
-	$.get(this.shapeUrl, function(data) {
-  	_this.$shape = $(data).find('polygon');
-  	_this.path = _this.$shape.attr('points');
-  	_this.shapeWidth = _this.$shape[0].getBBox().width;
-  	_this.shapeHeight = _this.$shape[0].getBBox().height;
-  	//_this.createShape();
 
-  	_this.writeText();
+	this.svg = new Image();
+	this.svg.src = this.shapeUrl;
+	
+	var _this = this;
+
+	this.svg.onload = function() {
+		_this.svgWidth = _this.svg.width;
+		_this.svgHeight = _this.svg.height;
+
+		var x, y, w, h, ratio;
+
+		w = _this.availW;
+		h = _this.svg.height * w / _this.svg.width;
+		x = 0;
+		y = 0;
+		
+		_this.svgWidth = w;
+		_this.svgHeight = h;
+
+		var canvas = document.createElement('canvas');
+		$(canvas).attr('height', h).attr('width', w);
+		var ctx = canvas.getContext('2d');
+		ctx.drawImage(_this.svg, x, y, w, h);
+
+		var imageData = ctx.getImageData(x,y,w,h); 
+  	var pixels = imageData.data;
+  	var numPixels = pixels.length;
+  	for (var i = 0; i < numPixels; i+= 4) {
+			var average = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+		
+			if(pixels[i] == 0 && pixels[i + 1] == 0 && pixels[i+3] == 0) {
+				//console.log('here');
+	    	pixels[i+3] = 0;
+
+			} else {
+				pixels[i] = 254;
+	    	pixels[i+1] = 91;
+	    	pixels[i+2] = 10;
+			}
+			
+		}
+
+		ctx.clearRect(0,0,w, h);
+
+		ctx.putImageData(imageData, 0,0);
+		_this.svgData = ctx.getImageData(0,0,w,h);
+
 
 		_this.drawPreview();
 
+		_this.writeText();
+
 		_this.setUpBinds();
-	});
 	
+	}
 		
 };
 
@@ -95,7 +137,11 @@ Numbers.prototype.drawPreview = function() {
 	this.previewCtx.clearRect(0,0,this.availW, this.previewH);
 
 	var _this = this;
-	
+
+	this.drawShape();
+
+	this.previewCtx.globalCompositeOperation = 'destination-over';
+
 	$.each(this.colors, function(i, color) {
 		var offset = 50;
 		var color = '#' + $(color).data('color');
@@ -121,18 +167,19 @@ Numbers.prototype.drawPreview = function() {
 		_this.previewCtx.restore();
 	});
 
-	this.drawShape();
 
 	this.colorData = this.$previewCanvas[0].toDataURL();
 	this.$image.css({
 		'background-image': 'url(' + this.colorData + ')',
-		'width': this.textWidth,
+		//'width': this.textWidth,
 		//'margin-left' : -(this.textWidth/2)
 	});
 };
 
 Numbers.prototype.drawShape = function() {
-	console.log('here');
+	
+	this.previewCtx.putImageData(this.svgData, 0, 0);
+
 };
 
 Numbers.prototype.writeText = function() {
@@ -152,8 +199,6 @@ Numbers.prototype.writeText = function() {
 	this.ctx.textAlign = 'left';
 	this.ctx.textBaseline = 'top'; // important!
 	this.ctx.font = font;
-	//w = this.ctx.measureText(message).width;
-	//x = (this.availW/2) - (w/2);
 
 
 	for (var i = 0; i < this.num.length; i++) {
@@ -164,32 +209,6 @@ Numbers.prototype.writeText = function() {
     	this.textWidth += w;
 	}
 
-	//this.ctx.fillText(message, x, 0);
-	
-
-
-	var _this = this;
-
-	// (function loop() {
- //  		_this.ctx.clearRect(x, 0, 60, 150);
- //  		_this.ctx.setLineDash([dashLen - dashOffset, dashOffset - speed]); // create a long dash mask
- //  		dashOffset -= speed;                                         // reduce dash length
- //  		_this.ctx.strokeText(txt[i], x, 0);                               // stroke letter
- //  		console.log(dashOffset);
- //  		if (dashOffset > 0) {
- //  			requestAnimationFrame(loop); 
- //  		} else {
- //    		// _this.ctx.fillText(txt[i], x, 90);                               // fill final letter
- //    		dashOffset = dashLen;                                      // prep next char
- //    		x += _this.ctx.measureText(txt[i++]).width +_this.ctx.lineWidth * Math.random();
- //    		//_this.ctx.setTransform(1, 0, 0, 1, 0, 3 * Math.random());        // random y-delta
- //    		//_this.ctx.rotate(Math.random() * 0.005);                         // random rotation
- //    		if (i < txt.length)  {
- //    			requestAnimationFrame(loop);
- //    		}
- //  		}
-  
-	// })();
 };
 
 Numbers.prototype.getTextHeight = function() {
