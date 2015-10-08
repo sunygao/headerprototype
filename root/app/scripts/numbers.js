@@ -12,9 +12,9 @@ var Numbers = function() {
 	this.previewH = this.availH;
 	this.shapeUrl = 'static/svg/triangle.svg';
 	this.displacementMap = 'static/img/displacement/perlin.png'
-	//this.animationStyle = 'fadeIn';
+	this.animationStyle = 'fadeIn';
 	//this.animationStyle = 'displace';
-	this.animationStyle = 'countup';
+	//this.animationStyle = 'countup';
 
 	this.num = $('#text_container .num').text();
 	this.characters = [];
@@ -292,13 +292,13 @@ Numbers.prototype.setUpBinds = function() {
 	var _this = this;
 
 	$(window).on('scroll', function(e) {
-		// var scrollTop = $(window).scrollTop();
-		// var scale = Math.max(1, .05 * scrollTop);
-		// console.log(scale);
-		// TweenMax.set(_this.bgContainer.scale, {
-		// 	x: scale
-		// });
-		// _this.renderer.render(_this.stage);
+		var scrollTop = $(window).scrollTop();
+		var scale = Math.max(1, .05 * scrollTop);
+		TweenMax.set(_this.bgContainer, {
+			x: -(.02 * scrollTop),
+			y: -(.05 * scrollTop)
+		});
+		_this.renderer.render(_this.stage);
 	});
 
 	$('#colors a').on('click', function(e) {
