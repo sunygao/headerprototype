@@ -13,7 +13,8 @@ var Numbers = function() {
 	this.shapeUrl = 'static/svg/triangle.svg';
 	this.displacementMap = 'static/img/displacement/perlin.png'
 	//this.animationStyle = 'fadeIn';
-	this.animationStyle = 'displace';
+	//this.animationStyle = 'displace';
+	this.animationStyle = 'countup';
 
 	this.num = $('#text_container .num').text();
 	this.characters = [];
@@ -38,10 +39,10 @@ var Numbers = function() {
 	this.toggleColors();
 
 	this.getText();
-
 	this.init();	
-};
+	
 
+};
 
 Numbers.prototype.init = function() {
 	this.$previewCanvas.attr('height', this.previewH).attr('width', this.availW);
@@ -118,6 +119,46 @@ Numbers.prototype.initPixi = function() {
 	this.loadAssets();
 };
 
+Numbers.prototype.initCountUp = function() {
+	var text = new PIXI.Text(0, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
+	var data = this.$previewCanvas[0].toDataURL();
+	var bg = new PIXI.Sprite.fromImage(data);
+	this.bgContainer.addChild(bg);
+	
+//	this.bgContainer.mask = text;
+	this.stage.addChild(this.bgContainer);
+	
+	var options = {
+		useEasing : true, 
+		useGrouping : true, 
+		separator : ',', 
+		decimal : '.', 
+		prefix : '', 
+		suffix : '' 
+	};
+
+	var numClean = this.num.replace(/,/g, '');
+	var demo = new CountUp("testNum", 0, parseInt(numClean), 0, .5, options);
+
+	var _this = this;
+
+	demo.start(function() {
+		var text = new PIXI.Text(_this.num, { font: _this.fontSize + ' ' + _this.fontFamily, fill: 'white', align: 'top' });		
+		_this.characterContainer.addChild(text);
+		_this.bgContainer.mask = text;
+		_this.renderer.render(_this.stage);
+	});
+
+	$(window).bind('count', function(e, data) {
+		var number = $('#testNum').text();
+		var text = new PIXI.Text(number, { font: _this.fontSize + ' ' + _this.fontFamily, fill: 'white', align: 'top' });
+			
+		_this.characterContainer.addChild(text);
+		_this.bgContainer.mask = text;
+		_this.renderer.render(_this.stage);
+	});
+};
+
 Numbers.prototype.loadAssets = function() {
 	var loader = new PIXI.loaders.Loader();
 
@@ -156,41 +197,45 @@ Numbers.prototype.onAssetsLoaded = function() {
 	whiteBg.drawRect(0, 0, this.availW, this.availH);
 	this.stage.addChild(whiteBg);
 
-	$.each(this.characters, $.proxy(function(i, text) {
-		var character = new PIXI.Text(text.character, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
-		character.x = text.x;
-		this.characterContainer.addChild(character);
-		this.pixiCharacters.push(character);
-			
-		switch(this.animationStyle) {
-			case 'fadeIn': 
-				character.alpha = 0;
-				character.y = 150;
-			break;
+	if(this.animationStyle == 'countup') {
+		this.initCountUp();
+	} else {
+		$.each(this.characters, $.proxy(function(i, text) {
+			var character = new PIXI.Text(text.character, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
+			character.x = text.x;
+			this.characterContainer.addChild(character);
+			this.pixiCharacters.push(character);
 				
-			case 'displace':
-				character.alpha = 0;
-				//character.y = 150;
-			break;
+			switch(this.animationStyle) {
+				case 'fadeIn': 
+					character.alpha = 0;
+					character.y = 150;
+				break;
+					
+				case 'displace':
+					character.alpha = 0;
+					//character.y = 150;
+				break;
 
-			default:
-			break;
-		}
+				default:
+				break;
+			}
 
-		var bg = new PIXI.Sprite.fromImage(this.pixiBgs[i].image);
-		var x =this.pixiBgs[i].x;
-		bg.mask = character;		
-		this.bgContainer.addChild(bg);
-		this.stage.addChild(this.bgContainer);
-		this.renderer.render(this.stage);
+			var bg = new PIXI.Sprite.fromImage(this.pixiBgs[i].image);
+			var x =this.pixiBgs[i].x;
+			bg.mask = character;		
+			this.bgContainer.addChild(bg);
+			this.stage.addChild(this.bgContainer);
+			this.renderer.render(this.stage);
 
-		if(i == this.characters.length - 1) {
-			setTimeout($.proxy(function() {
-				this.animateIn();
-			}, this), 500);	
-		}
-	
-	}, this));
+			if(i == this.characters.length - 1) {
+				setTimeout($.proxy(function() {
+					this.animateIn();
+				}, this), 500);	
+			}
+		
+		}, this));
+	}
 };
 
 Numbers.prototype.animateIn = function() {
@@ -200,29 +245,31 @@ Numbers.prototype.animateIn = function() {
 		//}
 	}, this));
 
-	this.displacementSprite = PIXI.Sprite.fromImage(this.displacementMap);
-	this.displacementSprite.scale.x = 2;
-	this.displacementSprite.scale.y = 2;
-	this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
-	this.characterContainer.addChild(this.displacementSprite);
-	var shadow = new PIXI.filters.DropShadowFilter();
-	this.stage.filters = [this.displacementFilter];
+	if(this.animationStyle == 'displace') {
+		this.displacementSprite = PIXI.Sprite.fromImage(this.displacementMap);
+		this.displacementSprite.scale.x = 2;
+		this.displacementSprite.scale.y = 2;
+		this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
+		this.characterContainer.addChild(this.displacementSprite);
+		var shadow = new PIXI.filters.DropShadowFilter();
+		this.stage.filters = [this.displacementFilter];
 
-	var _this = this;
-	animate();
-	
-	function animate() {
-		if(_this.displacementSprite.scale.x <= 100) {
-			_this.displacementSprite.scale.x += .5;
-			_this.displacementSprite.scale.y += .5;
-			_this.renderer.render(_this.stage);
-			requestAnimationFrame(animate);
-		} else {
-			cancelAnimationFrame(animate);
+		var _this = this;
+		animate();
+		
+		function animate() {
+			if(_this.displacementSprite.scale.x <= 100) {
+				_this.displacementSprite.scale.x += .5;
+				_this.displacementSprite.scale.y += .5;
+				_this.renderer.render(_this.stage);
+				requestAnimationFrame(animate);
+			} else {
+				cancelAnimationFrame(animate);
+			}
+
+			//console.log();
+		
 		}
-
-		//console.log();
-	
 	}
 
 };
