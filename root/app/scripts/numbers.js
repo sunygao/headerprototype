@@ -124,7 +124,6 @@ Numbers.prototype.initCountUp = function() {
 	var data = this.$previewCanvas[0].toDataURL();
 	var bg = new PIXI.Sprite.fromImage(data);
 	this.bgContainer.addChild(bg);
-	
 //	this.bgContainer.mask = text;
 	this.stage.addChild(this.bgContainer);
 	
@@ -138,7 +137,7 @@ Numbers.prototype.initCountUp = function() {
 	};
 
 	var numClean = this.num.replace(/,/g, '');
-	var demo = new CountUp("testNum", 0, parseInt(numClean), 0, .5, options);
+	var demo = new CountUp("testNum", 0, parseInt(numClean), 0, 1, options);
 
 	var _this = this;
 
@@ -152,7 +151,6 @@ Numbers.prototype.initCountUp = function() {
 	$(window).bind('count', function(e, data) {
 		var number = $('#testNum').text();
 		var text = new PIXI.Text(number, { font: _this.fontSize + ' ' + _this.fontFamily, fill: 'white', align: 'top' });
-			
 		_this.characterContainer.addChild(text);
 		_this.bgContainer.mask = text;
 		_this.renderer.render(_this.stage);
