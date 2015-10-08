@@ -111,10 +111,6 @@ Numbers.prototype.initPixi = function() {
 	this.$el[0].appendChild(this.renderer.view);
 
 	this.stage = new PIXI.Container();
-	this.characterContainer = new PIXI.Container();
-	this.bgContainer = new PIXI.Container();
-	this.stage.addChild(this.characterContainer);
-
 
 	this.loadAssets();
 };
@@ -162,23 +158,11 @@ Numbers.prototype.loadAssets = function() {
 
   loader.add(this.displacementMap);
 
-  var x = 0,
-	prevMin = 0,
-	prevMax = this.$previewCanvas.width(),
-	charMin = 0,
-	charMax = this.textWidth;
-
   $.each(this.characters, $.proxy(function(i, text) {
-  	var textX = this.characters[i+1] ? this.characters[i+1].x : charMax;
-		var bgPos = Math.round((textX - charMin)/(charMax - charMin) * (prevMax - prevMin) + prevMin);
-		var imageData = this.previewCtx.getImageData(x, 0, bgPos, this.previewH);
-		var canvas = document.createElement('canvas');
-		$(canvas).attr('height', this.previewH).attr('width', this.availW);
-		var ctx = canvas.getContext('2d');
-		ctx.putImageData(imageData, 0, 0);
-		var slicedImage = canvas.toDataURL();
-		this.pixiBgs.push({ image: slicedImage, x: bgPos });
-		loader.add(slicedImage);
+  	var slicedImage = this.getSlices(i, text)[0];
+  	var bgPos = this.getSlices(i, text)[1];
+  	loader.add(slicedImage);
+  	this.pixiBgs.push({ image: slicedImage, x: bgPos });
   }, this));
 
   var _this = this;
@@ -186,6 +170,25 @@ Numbers.prototype.loadAssets = function() {
   loader.load(function(item) {
   	_this.onAssetsLoaded();
   });
+};
+
+Numbers.prototype.getSlices = function(i, text) {
+	var x = 0,
+	prevMin = 0,
+	prevMax = this.$previewCanvas.width(),
+	charMin = 0,
+	charMax = this.textWidth;
+
+	var textX = this.characters[i+1] ? this.characters[i+1].x : charMax;
+	var bgPos = Math.round((textX - charMin)/(charMax - charMin) * (prevMax - prevMin) + prevMin);
+	var imageData = this.previewCtx.getImageData(x, 0, bgPos, this.previewH);
+	var canvas = document.createElement('canvas');
+	$(canvas).attr('height', this.previewH).attr('width', this.availW);
+	var ctx = canvas.getContext('2d');
+	ctx.putImageData(imageData, 0, 0);
+	var slicedImage = canvas.toDataURL();
+
+	return [slicedImage, bgPos];
 };
 
 Numbers.prototype.onAssetsLoaded = function() {
@@ -198,41 +201,7 @@ Numbers.prototype.onAssetsLoaded = function() {
 	if(this.animationStyle == 'countup') {
 		this.initCountUp();
 	} else {
-		$.each(this.characters, $.proxy(function(i, text) {
-			var character = new PIXI.Text(text.character, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
-			character.x = text.x;
-			this.characterContainer.addChild(character);
-			this.pixiCharacters.push(character);
-				
-			switch(this.animationStyle) {
-				case 'fadeIn': 
-					character.alpha = 0;
-					character.y = 150;
-				break;
-					
-				case 'displace':
-					character.alpha = 0;
-					//character.y = 150;
-				break;
-
-				default:
-				break;
-			}
-
-			var bg = new PIXI.Sprite.fromImage(this.pixiBgs[i].image);
-			var x =this.pixiBgs[i].x;
-			bg.mask = character;		
-			this.bgContainer.addChild(bg);
-			this.stage.addChild(this.bgContainer);
-			this.renderer.render(this.stage);
-
-			if(i == this.characters.length - 1) {
-				setTimeout($.proxy(function() {
-					this.animateIn();
-				}, this), 500);	
-			}
-		
-		}, this));
+		this.draw();
 	}
 };
 
@@ -311,6 +280,8 @@ Numbers.prototype.setUpBinds = function() {
 		}
 		_this.toggleColors();
 		_this.drawPreview();
+		_this.update();
+	
 	});
 };
 
@@ -323,6 +294,84 @@ Numbers.prototype.toggleColors = function() {
 	$.each($('#colors').find('[data-active="true"]'), function(i, color) {
 		_this.colors.push(color);
 	});
+};
+
+Numbers.prototype.update = function() {
+	var loader = new PIXI.loaders.Loader();
+	this.pixiBgs = [];
+
+  $.each(this.characters, $.proxy(function(i, text) {
+  	var slicedImage = this.getSlices(i, text)[0];
+  	var bgPos = this.getSlices(i, text)[1];
+  	loader.add(slicedImage);
+  	
+  	this.pixiBgs.push({ image: slicedImage, x: bgPos });
+  	
+  }, this));
+
+  var _this = this;
+
+  loader.load(function(item) {
+  	_this.draw();
+  });
+};
+
+Numbers.prototype.draw = function() {
+	this.pixiCharacters = [];
+
+	if(this.characterContainer) {
+		this.characterContainer.destroy(true);
+		this.stage.removeChild(this.characterContainer);
+	} 
+
+	if(this.bgContainer) {
+		this.bgContainer.destroy(true);
+		this.stage.removeChild(this.bgContainer);
+	}
+
+	this.characterContainer = new PIXI.Container();
+	this.bgContainer = new PIXI.Container();
+	this.stage.addChild(this.characterContainer);
+
+	$.each(this.characters, $.proxy(function(i, text) {
+		var character = new PIXI.Text(text.character, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
+		character.x = text.x;
+
+		this.characterContainer.addChild(character);
+
+		this.pixiCharacters.push(character);
+		
+		switch(this.animationStyle) {
+			case 'fadeIn': 
+
+				character.alpha = 0;
+				character.y = 150;
+			break;
+				
+			case 'displace':
+				character.alpha = 0;
+				//character.y = 150;
+			break;
+
+			default:
+			break;
+		}
+
+		var bg = new PIXI.Sprite.fromImage(this.pixiBgs[i].image);
+		var x =this.pixiBgs[i].x;
+		bg.mask = character;		
+		this.bgContainer.addChild(bg);
+
+		this.stage.addChild(this.bgContainer);
+		this.renderer.render(this.stage);
+
+		if(i == this.characters.length - 1) {
+			setTimeout($.proxy(function() {
+				this.animateIn();
+			}, this), 500);	
+		}
+	
+	}, this));
 };
 
 Numbers.prototype.drawPreview = function() {
