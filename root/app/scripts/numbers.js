@@ -118,9 +118,12 @@ Numbers.prototype.initPixi = function() {
 Numbers.prototype.initCountUp = function() {
 	var text = new PIXI.Text(0, { font: this.fontSize + ' ' + this.fontFamily, fill: 'white', align: 'top' });
 	var data = this.$previewCanvas[0].toDataURL();
+
 	var bg = new PIXI.Sprite.fromImage(data);
+	this.bgContainer = new PIXI.Container();
+	this.characterContainer = new PIXI.Container();
 	this.bgContainer.addChild(bg);
-//	this.bgContainer.mask = text;
+	this.stage.addChild(this.characterContainer);
 	this.stage.addChild(this.bgContainer);
 	
 	var options = {
