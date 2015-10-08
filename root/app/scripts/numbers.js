@@ -11,8 +11,15 @@ var Numbers = function() {
 	this.availH = this.$el.height();
 	this.previewH = this.availH;
 	this.shapeUrl = 'static/svg/triangle.svg';
+	this.displacementMap = 'static/img/displacement/perlin.png'
+	//this.animationStyle = 'fadeIn';
+	this.animationStyle = 'displace';
 
 	this.num = $('#text_container .num').text();
+	this.characters = [];
+
+	this.pixiCharacters = [];
+	this.pixiBgs = [];
 
 	// this.$canvas = $('#numbers_canvas');
 	// this.ctx = this.$canvas[0].getContext('2d');
@@ -30,6 +37,7 @@ var Numbers = function() {
 
 	this.toggleColors();
 
+	this.getText();
 
 	this.init();	
 };
@@ -86,10 +94,8 @@ Numbers.prototype.init = function() {
 		ctx.putImageData(imageData, 0,0);
 		_this.svgData = ctx.getImageData(0,0,w,h);
 
-
 		_this.drawPreview();
 
-		//_this.writeText();
 		_this.initPixi();
 
 		_this.setUpBinds();
@@ -104,44 +110,139 @@ Numbers.prototype.initPixi = function() {
 
 	this.stage = new PIXI.Container();
 
-	this.container = new PIXI.Container();
-
+	//this.loadAssets();
 
 	//create a white bg
 	var whiteBg = new PIXI.Graphics();
 	whiteBg.beginFill(0xFFFFFF);
 	whiteBg.drawRect(0, 0, this.availW, this.availH);
+	this.stage.addChild(whiteBg);
+
+	this.bgContainer = new PIXI.Container();
+	this.characterContainer = new PIXI.Container();
+	this.displacementSprite = PIXI.Sprite.fromImage(this.displacementMap);
+	this.displacementSprite.scale.x = 2;
+	this.displacementSprite.scale.y = 2;
+	this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
+	this.characterContainer.addChild(this.displacementSprite);
+	this.characterContainer.filters = [this.displacementFilter];
+
+	var _this = this;
+	animate();
+	
+
+	function animate() {
+
+		_this.displacementSprite.scale.x += .1;
+		_this.renderer.render(_this.stage);
+		requestAnimationFrame(animate);
+	}
+
+
+	this.stage.addChild(this.characterContainer);
 
 	var loader = new PIXI.loaders.Loader();
 	var _this = this;
-	loader.add(this.colorData);
-	loader.load(function(item) {
-		var bg = new PIXI.Sprite.fromImage(_this.colorData);
-		//bg.anchor.set(0.5);
-		bg.position.x = 0;
-		bg.position.y = 0;
-		
-		var mask = new PIXI.Text(_this.num, { font: _this.fontSize + ' ' + _this.fontFamily, fill: 'red', align: 'top' });
-		bg.mask = mask;
-		_this.stage.addChild(whiteBg);
-		_this.stage.addChild(mask);
-		_this.stage.addChild(bg);
-		
-    _this.renderer.render(_this.stage);
-  });
+	var x = 0;
 	
+	var prevMin = 0,
+	prevMax = this.$previewCanvas.width(),
+	charMin = 0,
+	charMax = this.textWidth;
 	
+	$.each(this.characters, function(i, text) {
+		var character = new PIXI.Text(text.character, { font: _this.fontSize + ' ' + _this.fontFamily, fill: 'white', align: 'top' });
+		character.x = text.x;
 
+		switch(_this.animationStyle) {
+			case 'fadeIn': 
+				character.alpha = 0;
+				character.y = 150;
+			break;
+				
+			case 'displace':
+
+			break;
+
+			default:
+			break;
+		}
+
+	
+	
+		_this.pixiCharacters.push(character);
+
+		//split up the background into pieces that match the text
+		var textX = _this.characters[i+1] ? _this.characters[i+1].x : charMax;
+		var bgPos = Math.round((textX - charMin)/(charMax - charMin) * (prevMax - prevMin) + prevMin);
+		var imageData = _this.previewCtx.getImageData(x, 0, bgPos, _this.previewH);
+		var canvas = document.createElement('canvas');
+		$(canvas).attr('height', _this.previewH).attr('width', _this.availW);
+		var ctx = canvas.getContext('2d');
+		ctx.putImageData(imageData, 0, 0);
+		var slicedImage = canvas.toDataURL();
+		_this.characterContainer.addChild(character);
+
+			
+
+		loader.add(slicedImage)
+		.load(function(item) {
+			var bg = new PIXI.Sprite.fromImage(slicedImage);
+			x = bgPos;
+			bg.mask = character;		
+			_this.bgContainer.addChild(bg);
+			_this.stage.addChild(_this.bgContainer);
+			_this.pixiBgs.push(bg);
+			_this.renderer.render(_this.stage);
+
+			if(i == _this.characters.length - 1) {
+
+				setTimeout(function() {
+					_this.animateIn();
+				}, 1000);
+				
+			}
+		});
+	});
+};
+
+Numbers.prototype.animateIn = function() {
+
+	$.each(this.pixiCharacters, $.proxy(function(i, item) {
+		if(this.animationStyle == 'fadeIn') {
+			this.fadeIn(item, i);
+		}
+	}, this));
+
+};
+
+Numbers.prototype.fadeIn = function(item, i) {
+	TweenMax.to(item, .3, {
+		alpha: 1,
+		y: 0,
+		ease: 'easeOut',
+		delay: i * .1,
+		onUpdate: function() {
+			this.renderer.render(this.stage);
+		},
+		onUpdateScope: this,
+		onComplete: function() {
+
+		}
+	});
 };
 
 Numbers.prototype.setUpBinds = function() {
 	var _this = this;
 
 	$(window).on('scroll', function(e) {
-		var scrollTop = $(window).scrollTop();
-		TweenMax.set(_this.$image, {
-			backgroundPosition: -(.5 * scrollTop) + 'px ' + -(.5 * scrollTop) + 'px'
-		});
+		// var scrollTop = $(window).scrollTop();
+		// var scale = Math.max(1, .05 * scrollTop);
+		// console.log(scale);
+		// TweenMax.set(_this.bgContainer.scale, {
+		// 	x: scale
+		// });
+		// _this.renderer.render(_this.stage);
 	});
 
 	$('#colors a').on('click', function(e) {
@@ -216,57 +317,35 @@ Numbers.prototype.drawShape = function() {
 
 };
 
-Numbers.prototype.writeText = function() {
+Numbers.prototype.getText = function() {
 	var font = this.fontSize + ' ' + this.fontFamily;
 	var message = this.num;
 	var w, x = 0, y;
 	var dashLen = 220, dashOffset = dashLen, speed = 10,
 	txt = message, i = 0;
+
+	var canvas = document.createElement('canvas');
+	$(canvas).attr('height', this.availH).attr('width', this.availW);
+	var ctx = canvas.getContext('2d');
 	
-	this.ctx.rect(0, 0, this.availW, this.availH);
-	this.ctx.fillStyle = this.bgColor;
-	this.ctx.fill();
-
-	this.ctx.globalCompositeOperation = 'xor';
-
-	this.ctx.fillStyle = 'black';
-	this.ctx.textAlign = 'left';
-	this.ctx.textBaseline = 'top'; // important!
-	this.ctx.font = font;
+	ctx.fillStyle = 'black';
+	ctx.textAlign = 'left';
+	ctx.textBaseline = 'top'; // important!
+	ctx.font = font;
 
 	for (var i = 0; i < this.num.length; i++) {
     	var character = this.num.charAt(i);
-    	var w = this.ctx.measureText(this.num.charAt(i)).width;
-    	this.ctx.fillText(character, x, 0);
+    	var w = ctx.measureText(this.num.charAt(i)).width;
+    	//ctx.fillText(character, x, 0);
+   
+    	this.characters.push({
+    		character : character,
+    		x : x
+    	});
+   
     	x = x + w;
     	this.textWidth += w;
 	}
-
-	
-
-
-	var _this = this;
-
-	// (function loop() {
- //  		_this.ctx.clearRect(x, 0, 60, 150);
- //  		_this.ctx.setLineDash([dashLen - dashOffset, dashOffset - speed]); // create a long dash mask
- //  		dashOffset -= speed;                                         // reduce dash length
- //  		_this.ctx.strokeText(txt[i], x, 0);                               // stroke letter
- //  		console.log(dashOffset);
- //  		if (dashOffset > 0) {
- //  			requestAnimationFrame(loop); 
- //  		} else {
- //    		// _this.ctx.fillText(txt[i], x, 90);                               // fill final letter
- //    		dashOffset = dashLen;                                      // prep next char
- //    		x += _this.ctx.measureText(txt[i++]).width +_this.ctx.lineWidth * Math.random();
- //    		//_this.ctx.setTransform(1, 0, 0, 1, 0, 3 * Math.random());        // random y-delta
- //    		//_this.ctx.rotate(Math.random() * 0.005);                         // random rotation
- //    		if (i < txt.length)  {
- //    			requestAnimationFrame(loop);
- //    		}
- //  		}
-  
-	// })();
 };
 
 Numbers.prototype.getTextHeight = function() {
